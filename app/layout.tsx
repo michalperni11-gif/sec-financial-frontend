@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
-const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains',
+  weight: ['300', '400', '500', '600', '700', '800'],
+})
 
 export const metadata: Metadata = {
   title: 'SECbase — Affordable SEC Financial Data API',
@@ -13,8 +16,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable} scroll-smooth`}>
-      <body className="bg-[#0a0a0a] font-sans text-zinc-100 antialiased">
+    <html lang="en" className={`${jetbrainsMono.variable} scroll-smooth`}>
+      <body className="bg-[#080808] text-zinc-100 antialiased">
         {children}
       </body>
     </html>
