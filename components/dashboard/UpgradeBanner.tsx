@@ -1,4 +1,3 @@
-import Link from 'next/link'
 
 const NEXT_TIER: Record<string, { name: string; price: string; benefit: string }> = {
   free: { name: 'Basic', price: '$5/mo', benefit: '10 years of history + 500 req/min' },
@@ -17,12 +16,12 @@ export function UpgradeBanner({ tier }: { tier: string }) {
       <p className="text-sm text-zinc-400">
         Upgrade to <span className="font-semibold text-cyan-400">{next.name}</span> ({next.price}) — get {next.benefit}
       </p>
-      <Link
+      <a
         href="#pricing"
         className="ml-4 flex-shrink-0 rounded bg-cyan-400 px-4 py-1.5 text-xs font-bold text-black hover:bg-cyan-300 transition-colors"
       >
         Upgrade
-      </Link>
+      </a>
     </div>
   )
 }

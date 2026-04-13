@@ -10,9 +10,14 @@ export function ApiKeyBox({ apiKey }: { apiKey: string }) {
     : apiKey.slice(0, 8) + '••••••••••••••••' + apiKey.slice(-4)
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(apiKey)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(apiKey)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard not available (non-HTTPS or browser restriction)
+      setCopied(false)
+    }
   }
 
   return (

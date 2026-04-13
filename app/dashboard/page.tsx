@@ -61,7 +61,7 @@ export default function DashboardPage() {
   }
 
   const tier = user.tier.toLowerCase()
-  const dailyLimit = DAILY_LIMIT[tier]
+  const dailyLimit = DAILY_LIMIT[tier] ?? null
 
   return (
     <div className="mx-auto max-w-3xl">
