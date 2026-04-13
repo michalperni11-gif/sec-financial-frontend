@@ -16,14 +16,6 @@ function ResetPasswordContent() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  if (!token) {
-    return (
-      <AuthCard title="Invalid link">
-        <p className="text-sm text-zinc-400">This reset link is missing a token. Please use the link from your email.</p>
-      </AuthCard>
-    )
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -41,6 +33,14 @@ function ResetPasswordContent() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!token) {
+    return (
+      <AuthCard title="Invalid link">
+        <p className="text-sm text-zinc-400">This reset link is missing a token. Please use the link from your email.</p>
+      </AuthCard>
+    )
   }
 
   return (

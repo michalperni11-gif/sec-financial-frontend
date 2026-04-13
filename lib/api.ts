@@ -1,3 +1,5 @@
+import { getToken, clearToken } from '@/lib/auth'
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
 
 export class ApiError extends Error {
@@ -11,10 +13,7 @@ export async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('secbase_jwt')
-      : null
+  const token = getToken()
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -25,8 +24,8 @@ export async function apiFetch<T>(
   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
 
   if (res.status === 401) {
+    clearToken()
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('secbase_jwt')
       window.location.href = '/login'
     }
     throw new ApiError(401, 'Unauthorized')
