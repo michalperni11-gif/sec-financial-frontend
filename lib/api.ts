@@ -1,0 +1,44 @@
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
+
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
+export async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const token =
+    typeof window !== 'undefined'
+      ? localStorage.getItem('secbase_jwt')
+      : null
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers as Record<string, string> ?? {}),
+  }
+
+  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+
+  if (res.status === 401) {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('secbase_jwt')
+      window.location.href = '/login'
+    }
+    throw new ApiError(401, 'Unauthorized')
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    const message = (body as { detail?: string; message?: string }).detail
+      ?? (body as { detail?: string; message?: string }).message
+      ?? 'Request failed'
+    throw new ApiError(res.status, message)
+  }
+
+  return res.json() as Promise<T>
+}
