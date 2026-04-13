@@ -70,10 +70,10 @@ export function PricingTable() {
         {TIERS.map((tier) => (
           <div
             key={tier.name}
-            className={`relative flex flex-col rounded-lg border p-5 ${
+            className={`relative flex flex-col rounded-lg border p-5 transition-all duration-200 ${
               tier.highlight
-                ? 'border-cyan-400 bg-cyan-400/5'
-                : 'border-zinc-800 bg-zinc-900'
+                ? 'border-cyan-400 bg-cyan-400/5 hover:bg-cyan-400/10'
+                : 'border-zinc-800 bg-zinc-900 hover:border-zinc-600 hover:bg-zinc-800/60'
             }`}
           >
             {tier.highlight && (
@@ -89,9 +89,18 @@ export function PricingTable() {
               </div>
             </div>
             <ul className="mb-6 flex flex-col gap-2 text-xs text-zinc-400">
-              <li><span aria-hidden="true">📍</span> {tier.coverage}</li>
-              <li><span aria-hidden="true">📅</span> {tier.history}</li>
-              <li><span aria-hidden="true">⚡</span> {tier.rateLimit}</li>
+              <li className="flex items-start gap-1.5">
+                <span className="mt-0.5 text-zinc-600">—</span>
+                {tier.coverage}
+              </li>
+              <li className="flex items-start gap-1.5">
+                <span className="mt-0.5 text-zinc-600">—</span>
+                {tier.history}
+              </li>
+              <li className="flex items-start gap-1.5">
+                <span className="mt-0.5 text-zinc-600">—</span>
+                {tier.rateLimit}
+              </li>
             </ul>
             <Link
               href="/register"

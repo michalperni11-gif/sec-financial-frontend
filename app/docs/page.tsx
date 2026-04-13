@@ -55,7 +55,19 @@ export default function DocsPage() {
         <section className="mb-12">
           <h2 className="mb-4 text-lg font-bold text-zinc-100">Endpoints</h2>
           <p className="mb-4 text-sm text-zinc-500">
-            Base URL: <code className="text-zinc-300">https://sec-financial-api-production.up.railway.app</code>
+            Base URL:{' '}
+            <code className="text-zinc-300">https://sec-financial-api-production.up.railway.app</code>
+          </p>
+          <p className="mb-4 text-sm text-zinc-500">
+            Append the endpoint path to the base URL. For interactive exploration, use the{' '}
+            <a
+              href="https://sec-financial-api-production.up.railway.app/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:underline"
+            >
+              API reference (Swagger UI)
+            </a>.
           </p>
           <div className="flex flex-col gap-2">
             {ENDPOINTS.map((ep) => (
