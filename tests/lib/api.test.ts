@@ -55,7 +55,7 @@ describe('apiFetch', () => {
 
   it('throws ApiError with status code', async () => {
     mockFetch(400, { detail: 'Bad request' })
-    const err = await apiFetch('/bad').catch(e => e)
+    const err = await apiFetch('/bad').catch(e => e) as ApiError
     expect(err).toBeInstanceOf(ApiError)
     expect(err.status).toBe(400)
   })
@@ -67,7 +67,7 @@ describe('apiFetch', () => {
       value: { href: '' },
       writable: true,
     })
-    const err = await apiFetch('/auth/me').catch(e => e)
+    const err = await apiFetch('/auth/me').catch(e => e) as ApiError
     expect(err).toBeInstanceOf(ApiError)
     expect(err.status).toBe(401)
     expect(localStorage.getItem('secbase_jwt')).toBeNull()
