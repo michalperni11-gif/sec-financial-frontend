@@ -1,120 +1,263 @@
 import Link from 'next/link'
+import { fmtUSD, fmtEPS, fmtPct, yoyGrowth } from '@/lib/format'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface IncomeRow {
+  fiscal_year: number
+  revenue?: number
+  gross_profit?: number
+  net_income?: number
+  eps_basic?: number
+  eps_diluted?: number
+}
+
+interface BackendResponse {
+  periods?: string[]
+  data?: Record<string, Record<string, number | null>>
+}
+
+// ─── Static fallback (shown when API key not configured) ──────────────────────
+
+const FALLBACK: IncomeRow[] = [
+  { fiscal_year: 2025, revenue: 416161000000, gross_profit: 195201000000, net_income: 113611000000, eps_basic: 7.49 },
+  { fiscal_year: 2024, revenue: 391035000000, gross_profit: 180683000000, net_income: 93736000000,  eps_basic: 6.11 },
+  { fiscal_year: 2023, revenue: 383285000000, gross_profit: 169148000000, net_income: 96995000000,  eps_basic: 6.16 },
+  { fiscal_year: 2022, revenue: 394328000000, gross_profit: 170782000000, net_income: 99803000000,  eps_basic: 6.11 },
+  { fiscal_year: 2021, revenue: 365817000000, gross_profit: 152836000000, net_income: 94680000000,  eps_basic: 5.61 },
+]
+
+// ─── Data fetch ───────────────────────────────────────────────────────────────
+
+async function fetchIncome(): Promise<{ rows: IncomeRow[]; live: boolean }> {
+  const key = process.env.SECBASE_DEMO_KEY
+  if (!key) return { rows: FALLBACK, live: false }
+
+  try {
+    const base = process.env.NEXT_PUBLIC_API_URL ?? 'https://sec-financial-api-production.up.railway.app'
+    const res  = await fetch(`${base}/company/AAPL/income-statement`, {
+      headers: { 'X-API-Key': key },
+      next: { revalidate: 86400 },
+    })
+    if (!res.ok) return { rows: FALLBACK, live: false }
+
+    const json: BackendResponse = await res.json()
+    const periods = json.periods ?? []
+    const metrics = json.data ?? {}
+
+    const rows: IncomeRow[] = periods.map((period) => ({
+      fiscal_year: new Date(period).getFullYear(),
+      revenue:     metrics['Revenue']?.[period]     ?? undefined,
+      gross_profit: metrics['GrossProfit']?.[period] ?? undefined,
+      net_income:  metrics['NetIncome']?.[period]   ?? undefined,
+      eps_basic:   metrics['EPSBasic']?.[period]    ?? undefined,
+      eps_diluted: metrics['EPSDiluted']?.[period]  ?? undefined,
+    }))
+      .filter((r) => r.revenue != null)
+      .sort((a, b) => b.fiscal_year - a.fiscal_year)
+      .slice(0, 5)
+
+    return rows.length > 0 ? { rows, live: true } : { rows: FALLBACK, live: false }
+  } catch {
+    return { rows: FALLBACK, live: false }
+  }
+}
+
+// ─── Stats row ────────────────────────────────────────────────────────────────
 
 const STATS = [
-  { value: '2,800+', label: 'companies' },
-  { value: '30yr',   label: 'history' },
-  { value: '$5/mo',  label: 'starts at' },
-  { value: 'REST',   label: 'API' },
+  {
+    value: '2,800+',
+    label: 'Companies',
+    sub: 'Full market coverage',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+      </svg>
+    ),
+  },
+  {
+    value: '30 Years',
+    label: 'Historical Data',
+    sub: 'Full EDGAR archive',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+    ),
+  },
+  {
+    value: 'Direct',
+    label: 'REST API',
+    sub: 'JSON, no parsing needed',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+      </svg>
+    ),
+  },
 ]
 
-const TERMINAL_LINES = [
-  { type: 'cmd',    text: 'GET /company/AAPL/income-statement' },
-  { type: 'header', text: 'Authorization: Bearer sk_live_···' },
-  { type: 'blank',  text: '' },
-  { type: 'status', text: '200 OK  ·  87ms' },
-  { type: 'blank',  text: '' },
-  { type: 'json',   text: '{' },
-  { type: 'key',    text: '  "ticker":       "AAPL",' },
-  { type: 'key',    text: '  "fiscal_year":  2024,' },
-  { type: 'key',    text: '  "revenue":      391035000000,' },
-  { type: 'key',    text: '  "gross_profit": 180683000000,' },
-  { type: 'key',    text: '  "net_income":   93736000000,' },
-  { type: 'key',    text: '  "eps_basic":    6.08' },
-  { type: 'json',   text: '}' },
-]
+// ─── Component ────────────────────────────────────────────────────────────────
 
-export function Hero() {
+export async function Hero() {
+  const { rows, live } = await fetchIncome()
+
+  const latest  = rows[0]
+  const prev    = rows[1]
+
+  // Derived mini-metrics from income statement (no real-time price data needed)
+  const grossMargin = latest?.gross_profit && latest?.revenue
+    ? fmtPct(latest.gross_profit / latest.revenue)
+    : 'N/A'
+  const netMargin = latest?.net_income && latest?.revenue
+    ? fmtPct(latest.net_income / latest.revenue)
+    : 'N/A'
+  const revenueGrowth = latest?.revenue && prev?.revenue
+    ? yoyGrowth(latest.revenue, prev.revenue)
+    : 'N/A'
+  const growthUp = revenueGrowth.startsWith('+')
+
+  const miniMetrics = [
+    { label: 'Gross Margin',   value: grossMargin,   change: null },
+    { label: 'Net Margin',     value: netMargin,     change: null },
+    { label: 'Rev Growth YoY', value: revenueGrowth, change: revenueGrowth, up: growthUp },
+  ]
+
   return (
-    <section className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 pb-16 pt-32 lg:grid-cols-2 lg:items-center lg:gap-16">
-      {/* Left: headline + CTA */}
-      <div>
-        <div className="animate-fade-up animate-delay-1 mb-6 inline-flex items-center gap-2 rounded-sm border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-xs text-cyan-400 tracking-widest uppercase">
-          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 glow-cyan inline-block" />
-          30 years of SEC EDGAR data
-        </div>
+    <section className="mx-auto max-w-6xl px-6 pb-16 pt-32">
+      <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
 
-        <h1 className="animate-fade-up animate-delay-2 mb-5 text-4xl font-bold leading-[1.1] tracking-tight text-zinc-50 lg:text-5xl">
-          Financial data<br />
-          <span className="text-cyan-400 glow-cyan">without the<br />price tag</span>
-        </h1>
+        {/* ── Left ──────────────────────────────────── */}
+        <div>
+          <h1 className="animate-fade-up animate-delay-1 mb-6 text-5xl font-black leading-[1.05] tracking-tight text-white lg:text-6xl">
+            Raw SEC Data.<br />
+            No Fluff.<br />
+            <span className="text-[#00d47e] glow-green">Low Cost.</span>
+          </h1>
 
-        <p className="animate-fade-up animate-delay-3 mb-8 text-sm leading-relaxed text-zinc-500">
-          Income · Balance Sheet · Cash Flow · Metrics<br />
-          2,800+ companies · Full EDGAR history · REST API
-        </p>
+          <p className="animate-fade-up animate-delay-2 mb-8 max-w-sm text-sm leading-relaxed text-zinc-500">
+            Standardized financial facts for developers who care about
+            speed, not expensive terminals.
+          </p>
 
-        <div className="animate-fade-up animate-delay-4 flex flex-wrap items-center gap-4">
-          <Link
-            href="/register"
-            className="group inline-flex items-center gap-2 rounded-sm bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-cyan-300 hover:shadow-[0_0_24px_rgba(34,211,238,0.35)]"
-          >
-            Start for free
-            <span className="transition-transform group-hover:translate-x-0.5">→</span>
-          </Link>
-          <Link href="/docs" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
-            View docs →
-          </Link>
-        </div>
-
-        {/* Stats */}
-        <div className="animate-fade-up animate-delay-5 mt-12 flex flex-wrap gap-8 border-t border-zinc-800/60 pt-8">
-          {STATS.map((s) => (
-            <div key={s.label}>
-              <div className="text-xl font-bold text-zinc-100 tabular-nums">{s.value}</div>
-              <div className="mt-0.5 text-xs text-zinc-600 uppercase tracking-widest">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Right: terminal window */}
-      <div className="animate-slide-right animate-delay-3 hidden lg:block">
-        <div className="rounded-md border border-zinc-800 bg-zinc-950/80 glow-border-cyan backdrop-blur-sm overflow-hidden">
-          {/* Terminal title bar */}
-          <div className="flex items-center gap-2 border-b border-zinc-800 px-4 py-3">
-            <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-            <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-            <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-            <span className="ml-3 text-xs text-zinc-600 tracking-wider">SECbase API</span>
+          <div className="animate-fade-up animate-delay-3 flex flex-wrap items-center gap-3">
+            <Link
+              href="/register"
+              className="group inline-flex items-center gap-2 bg-[#00d47e] px-5 py-2.5 text-sm font-bold text-black transition-all hover:bg-[#00f090] hover:shadow-[0_0_28px_rgba(0,212,126,0.4)]"
+            >
+              Start Free Trial
+              <span className="transition-transform group-hover:translate-x-0.5">→</span>
+            </Link>
+            <Link
+              href="/docs"
+              className="border border-white/15 px-5 py-2.5 text-sm font-semibold text-zinc-300 transition-all hover:border-white/30 hover:text-white"
+            >
+              View Documentation
+            </Link>
           </div>
-          {/* Terminal content */}
-          <div className="p-5 font-mono text-xs leading-relaxed">
-            {TERMINAL_LINES.map((line, i) => (
-              <div
-                key={i}
-                className="animate-fade-in"
-                style={{ animationDelay: `${0.8 + i * 0.06}s`, animationFillMode: 'both' }}
-              >
-                {line.type === 'cmd' && (
-                  <div className="text-cyan-400">
-                    <span className="text-zinc-600">$ curl </span>{line.text}
-                  </div>
-                )}
-                {line.type === 'header' && (
-                  <div className="text-zinc-600 ml-5">{line.text}</div>
-                )}
-                {line.type === 'status' && (
-                  <div className="text-green-400">{line.text}</div>
-                )}
-                {line.type === 'blank' && <div className="h-3" />}
-                {line.type === 'json' && (
-                  <div className="text-zinc-300">{line.text}</div>
-                )}
-                {line.type === 'key' && (
-                  <div>
-                    <span className="text-zinc-500">{line.text.split(':')[0]}:</span>
-                    <span className="text-cyan-300">{line.text.split(':').slice(1).join(':')}</span>
-                  </div>
-                )}
+        </div>
+
+        {/* ── Right — live AAPL data table ─────────── */}
+        <div className="animate-slide-right animate-delay-3 hidden lg:block">
+          <div className="border border-white/[0.08] bg-[#1a1a1a] overflow-hidden">
+
+            {/* Panel header */}
+            <div className="flex items-center justify-between border-b border-white/[0.06] bg-[#141414] px-4 py-2.5">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-black tracking-wider text-white">AAPL</span>
+                <span className="text-xs text-zinc-500">Apple Inc.</span>
+                <span className="border border-[#00d47e]/20 bg-[#00d47e]/8 px-1.5 py-0.5 text-xs font-medium text-[#00d47e] tracking-wider">
+                  INCOME STMT
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className={`h-1.5 w-1.5 rounded-full ${live ? 'live-dot bg-[#00d47e]' : 'bg-zinc-600'}`} />
+                <span className="text-xs text-zinc-600 tracking-wider">{live ? 'LIVE' : 'CACHED'}</span>
+              </div>
+            </div>
+
+            {/* Table */}
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-white/[0.05] bg-[#161616]">
+                  <th className="px-4 py-2.5 text-left font-medium uppercase tracking-widest text-zinc-600">Period</th>
+                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-600">Revenue</th>
+                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-600">Gross</th>
+                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-600">Net Inc.</th>
+                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-600">EPS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, i) => {
+                  const prevRow = rows[i + 1]
+                  const epsUp   = prevRow?.eps_basic != null && row.eps_basic != null
+                    ? row.eps_basic >= prevRow.eps_basic
+                    : true
+                  return (
+                    <tr
+                      key={row.fiscal_year}
+                      className="animate-fade-in border-b border-white/[0.04] transition-colors hover:bg-white/[0.03]"
+                      style={{ animationDelay: `${0.4 + i * 0.08}s`, animationFillMode: 'both' }}
+                    >
+                      <td className="px-4 py-2.5 font-medium text-zinc-400">FY {row.fiscal_year}</td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-zinc-200">{fmtUSD(row.revenue)}</td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-zinc-400">{fmtUSD(row.gross_profit)}</td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-[#00d47e]">{fmtUSD(row.net_income)}</td>
+                      <td className="px-3 py-2.5 text-right tabular-nums">
+                        <span className={epsUp ? 'text-[#00d47e]' : 'text-red-400'}>
+                          {fmtEPS(row.eps_basic)}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between border-t border-white/[0.05] bg-[#141414] px-4 py-2">
+              <span className="text-xs text-zinc-700">Source: SEC EDGAR · Updated weekly</span>
+              <code className="text-xs text-[#00d47e]/60">GET /company/AAPL/income-statement</code>
+            </div>
+          </div>
+
+          {/* Mini metric cards — derived from income statement */}
+          <div className="mt-1.5 grid grid-cols-3 gap-px bg-white/[0.05]">
+            {miniMetrics.map((m) => (
+              <div key={m.label} className="bg-[#1a1a1a] px-3 py-3 transition-colors hover:bg-[#1e1e1e]">
+                <div className="mb-1 text-xs uppercase tracking-widest text-zinc-600">{m.label}</div>
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-sm font-bold tabular-nums ${
+                    m.change
+                      ? m.up ? 'text-[#00d47e]' : 'text-red-400'
+                      : 'text-white'
+                  }`}>
+                    {m.value}
+                  </span>
+                </div>
               </div>
             ))}
-            {/* Blinking cursor */}
-            <div className="mt-2 flex items-center gap-1 text-zinc-600">
-              <span>$</span>
-              <span className="cursor-blink inline-block h-3.5 w-0.5 bg-cyan-400 ml-1" />
-            </div>
           </div>
         </div>
+
+      </div>
+
+      {/* ── Stats row ───────────────────────────────── */}
+      <div
+        id="features"
+        className="animate-fade-up animate-delay-5 mt-16 grid grid-cols-1 gap-px bg-white/[0.05] sm:grid-cols-3"
+      >
+        {STATS.map((s) => (
+          <div key={s.label} className="flex items-start gap-4 bg-[#111111] p-6 transition-colors hover:bg-[#161616]">
+            <div className="mt-0.5 text-[#00d47e]">{s.icon}</div>
+            <div>
+              <div className="text-xl font-black text-white">{s.value}</div>
+              <div className="mt-0.5 text-sm font-semibold text-zinc-300">{s.label}</div>
+              <div className="mt-0.5 text-xs text-zinc-600">{s.sub}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   )

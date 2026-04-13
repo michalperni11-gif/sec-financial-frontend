@@ -1,6 +1,6 @@
 import { Navbar } from '@/components/landing/Navbar'
 import { Hero } from '@/components/landing/Hero'
-import { FeaturesGrid } from '@/components/landing/FeaturesGrid'
+import { ApiExplorer } from '@/components/landing/ApiExplorer'
 import { PricingTable } from '@/components/landing/PricingTable'
 import { Footer } from '@/components/landing/Footer'
 
@@ -10,7 +10,7 @@ export default function LandingPage() {
       <Navbar />
       <main>
         <Hero />
-        <FeaturesGrid />
+        <ApiExplorer />
         <PricingTable />
       </main>
       <Footer />

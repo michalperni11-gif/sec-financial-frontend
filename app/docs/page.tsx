@@ -37,7 +37,7 @@ export default function DocsPage() {
             <li>
               <span className="font-semibold text-zinc-200">3. Make your first request</span>
               <pre className="mt-2 overflow-x-auto rounded border border-zinc-800 bg-zinc-900 p-4 text-xs text-cyan-400">{`curl "https://sec-financial-api-production.up.railway.app/company/AAPL/income-statement" \\
-  -H "Authorization: Bearer YOUR_API_KEY"`}</pre>
+  -H "X-API-Key: YOUR_API_KEY"`}</pre>
             </li>
           </ol>
         </section>
@@ -48,7 +48,7 @@ export default function DocsPage() {
           <p className="mb-3 text-sm text-zinc-400">
             Pass your API key in the <code className="rounded bg-zinc-800 px-1 text-cyan-400">Authorization</code> header:
           </p>
-          <pre className="overflow-x-auto rounded border border-zinc-800 bg-zinc-900 p-4 text-xs text-cyan-400">{`Authorization: Bearer sk_live_your_key_here`}</pre>
+          <pre className="overflow-x-auto rounded border border-zinc-800 bg-zinc-900 p-4 text-xs text-cyan-400">{`X-API-Key: sk_live_your_key_here`}</pre>
         </section>
 
         {/* Endpoints */}
