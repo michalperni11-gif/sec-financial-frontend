@@ -26,4 +26,28 @@ describe('auth token helpers', () => {
     clearToken()
     expect(getToken()).toBeNull()
   })
+
+  it('getToken returns null when window is undefined', () => {
+    const original = globalThis.window
+    // @ts-expect-error
+    delete globalThis.window
+    expect(getToken()).toBeNull()
+    globalThis.window = original
+  })
+
+  it('setToken does not throw when window is undefined', () => {
+    const original = globalThis.window
+    // @ts-expect-error
+    delete globalThis.window
+    expect(() => setToken('tok')).not.toThrow()
+    globalThis.window = original
+  })
+
+  it('clearToken does not throw when window is undefined', () => {
+    const original = globalThis.window
+    // @ts-expect-error
+    delete globalThis.window
+    expect(() => clearToken()).not.toThrow()
+    globalThis.window = original
+  })
 })
