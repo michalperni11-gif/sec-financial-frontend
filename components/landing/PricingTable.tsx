@@ -89,9 +89,9 @@ export function PricingTable() {
               </div>
             </div>
             <ul className="mb-6 flex flex-col gap-2 text-xs text-zinc-400">
-              <li>📍 {tier.coverage}</li>
-              <li>📅 {tier.history}</li>
-              <li>⚡ {tier.rateLimit}</li>
+              <li><span aria-hidden="true">📍</span> {tier.coverage}</li>
+              <li><span aria-hidden="true">📅</span> {tier.history}</li>
+              <li><span aria-hidden="true">⚡</span> {tier.rateLimit}</li>
             </ul>
             <Link
               href="/register"

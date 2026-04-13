@@ -37,7 +37,7 @@ export function FeaturesGrid() {
             key={f.title}
             className="rounded-lg border border-zinc-800 bg-zinc-900 p-6"
           >
-            <div className="mb-3 text-2xl">{f.icon}</div>
+            <div className="mb-3 text-2xl" aria-hidden="true">{f.icon}</div>
             <h3 className="mb-2 font-semibold text-zinc-100">{f.title}</h3>
             <p className="text-sm leading-relaxed text-zinc-500">{f.description}</p>
           </div>
