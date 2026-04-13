@@ -63,7 +63,6 @@ describe('apiFetch', () => {
   it('clears token and throws ApiError on 401', async () => {
     localStorage.setItem('secbase_jwt', 'expiredtoken')
     mockFetch(401, { detail: 'Unauthorized' })
-    const assignSpy = vi.fn()
     Object.defineProperty(window, 'location', {
       value: { href: '' },
       writable: true,
