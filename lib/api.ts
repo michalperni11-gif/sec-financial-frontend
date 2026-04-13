@@ -1,6 +1,9 @@
 import { getToken, clearToken } from '@/lib/auth'
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
+if (!BASE_URL) {
+  console.warn('[api] NEXT_PUBLIC_API_URL is not set — API calls will fail')
+}
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
