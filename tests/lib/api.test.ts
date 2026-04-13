@@ -55,15 +55,26 @@ describe('apiFetch', () => {
 
   it('throws ApiError with status code', async () => {
     mockFetch(400, { detail: 'Bad request' })
-    try {
-      await apiFetch('/bad')
-    } catch (e) {
-      expect(e).toBeInstanceOf(ApiError)
-      expect((e as ApiError).status).toBe(400)
-    }
+    const err = await apiFetch('/bad').catch(e => e)
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(400)
   })
 
-  it('throws ApiError with fallback message on 5xx with no body', async () => {
+  it('clears token and throws ApiError on 401', async () => {
+    localStorage.setItem('secbase_jwt', 'expiredtoken')
+    mockFetch(401, { detail: 'Unauthorized' })
+    const assignSpy = vi.fn()
+    Object.defineProperty(window, 'location', {
+      value: { href: '' },
+      writable: true,
+    })
+    const err = await apiFetch('/auth/me').catch(e => e)
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(401)
+    expect(localStorage.getItem('secbase_jwt')).toBeNull()
+  })
+
+  it('throws ApiError with fallback message on 5xx with no detail or message', async () => {
     mockFetch(500, {})
     await expect(apiFetch('/bad')).rejects.toThrow('Request failed')
   })
