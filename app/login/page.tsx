@@ -14,10 +14,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSent, setResendSent] = useState(false)
+
+  const emailNotVerified = error.toLowerCase().includes('not verified')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    setResendSent(false)
     setLoading(true)
     try {
       const { access_token } = await apiFetch<{ access_token: string; token_type: string }>(
@@ -33,8 +38,24 @@ export default function LoginPage() {
     }
   }
 
+  async function handleResend() {
+    setResendLoading(true)
+    try {
+      await apiFetch('/auth/resend-verification', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      })
+      setResendSent(true)
+    } catch {
+      // silently ignore — backend always returns success to prevent enumeration
+      setResendSent(true)
+    } finally {
+      setResendLoading(false)
+    }
+  }
+
   return (
-    <AuthCard title="Sign in to SECbase">
+    <AuthCard title="Sign in to SECfinAPI">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Input
           id="email"
@@ -54,7 +75,24 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && (
+          <div>
+            <p className="text-sm text-red-400">{error}</p>
+            {emailNotVerified && !resendSent && (
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resendLoading}
+                className="mt-1 text-sm text-cyan-400 hover:underline disabled:opacity-60"
+              >
+                {resendLoading ? 'Sending…' : 'Resend verification email'}
+              </button>
+            )}
+            {resendSent && (
+              <p className="mt-1 text-sm text-green-400">Verification email sent — check your inbox.</p>
+            )}
+          </div>
+        )}
         <Button type="submit" loading={loading} className="mt-2 w-full">
           Sign in
         </Button>
