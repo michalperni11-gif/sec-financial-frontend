@@ -17,7 +17,7 @@ export default function DocsPage() {
       <Navbar />
       <main className="mx-auto max-w-3xl px-6 pb-24 pt-28">
         <h1 className="mb-2 text-3xl font-black text-zinc-100">Documentation</h1>
-        <p className="mb-12 text-zinc-500">Get started with SECbase in minutes.</p>
+        <p className="mb-12 text-zinc-500">Get started with SECfinapi in minutes.</p>
 
         {/* Quick start */}
         <section className="mb-12">

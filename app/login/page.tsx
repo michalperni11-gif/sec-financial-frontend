@@ -34,7 +34,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthCard title="Sign in to SECbase">
+    <AuthCard title="Sign in to SECfinapi">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Input
           id="email"
