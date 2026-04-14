@@ -4,6 +4,7 @@ import { apiFetch, ApiError } from '@/lib/api'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { ApiKeyBox } from '@/components/dashboard/ApiKeyBox'
 import { UsageBar } from '@/components/dashboard/UsageBar'
+import { UsageChart } from '@/components/dashboard/UsageChart'
 import { UpgradeBanner } from '@/components/dashboard/UpgradeBanner'
 import { Spinner } from '@/components/ui/Spinner'
 
@@ -105,6 +106,10 @@ export default function DashboardPage() {
           <UsageBar used={user.requests_today} limit={dailyLimit} />
         </div>
       )}
+
+      <div className="mb-4">
+        <UsageChart />
+      </div>
 
       <UpgradeBanner tier={tier} />
     </div>
