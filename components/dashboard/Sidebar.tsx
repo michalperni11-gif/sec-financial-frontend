@@ -45,7 +45,7 @@ export function Sidebar() {
   return (
     <aside className="flex w-56 flex-shrink-0 flex-col border-r border-zinc-800 bg-zinc-950 px-3 py-6">
       <Link href="/" className="mb-8 px-3 text-sm font-black tracking-widest text-cyan-400">
-        SECBASE
+        SECfinAPI
       </Link>
 
       <nav className="flex flex-1 flex-col gap-1">

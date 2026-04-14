@@ -9,7 +9,7 @@ export function Navbar() {
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 2L4 10h6l-2 6 8-10h-6l2-6z" fill="#00d47e"/>
           </svg>
-          SEC<span className="text-[#00d47e]">base</span>
+          SECfin<span className="text-[#00d47e]">API</span>
         </Link>
 
         {/* Nav links */}
