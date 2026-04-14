@@ -77,4 +77,20 @@ describe('apiFetch', () => {
     mockFetch(500, {})
     await expect(apiFetch('/bad')).rejects.toThrow('Request failed')
   })
+
+  it('throws ApiError(0) on network failure', async () => {
+    vi.spyOn(global, 'fetch').mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    const err = await apiFetch('/auth/me').catch(e => e) as ApiError
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(0)
+    expect(err.message).toContain('Network error')
+  })
+
+  it('throws ApiError(429) on rate limit response', async () => {
+    mockFetch(429, {})
+    const err = await apiFetch('/auth/me').catch(e => e) as ApiError
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(429)
+    expect(err.message).toContain('Rate limit')
+  })
 })

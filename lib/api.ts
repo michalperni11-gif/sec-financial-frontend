@@ -24,7 +24,13 @@ export async function apiFetch<T>(
     ...(options.headers as Record<string, string> ?? {}),
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+  let res: Response
+  try {
+    res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown network error'
+    throw new ApiError(0, `Network error: ${msg}`)
+  }
 
   if (res.status === 401) {
     clearToken()
@@ -32,6 +38,10 @@ export async function apiFetch<T>(
       window.location.href = '/login'
     }
     throw new ApiError(401, 'Unauthorized')
+  }
+
+  if (res.status === 429) {
+    throw new ApiError(429, 'Rate limit exceeded — please try again shortly')
   }
 
   if (!res.ok) {
