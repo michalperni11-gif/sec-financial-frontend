@@ -186,3 +186,4 @@ This covers: standard tickers, BRK-B, BRK.B style, up to 10 chars.
 - Dashboard uses client-side auth guard only — no server-side session/cookie auth
 - `UsageBar` only renders if `api_key.requests_day_limit` exists (paid tiers have no daily limit)
 - `UpgradeBanner` maps tier to next tier — update if pricing tiers change
+- **JWT in localStorage** (`lib/auth.ts`) — known XSS risk, accepted pre-launch. Future improvement: move to `httpOnly` cookie via a `/auth/refresh` server action. Do not move this without a full auth refactor (dashboard guard, apiFetch, and all token reads).
