@@ -1,15 +1,18 @@
 'use client'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AuthCard } from '@/components/auth/AuthCard'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Spinner } from '@/components/ui/Spinner'
 import { apiFetch, ApiError } from '@/lib/api'
 import { setToken } from '@/lib/auth'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const passwordReset = searchParams.get('reset') === '1'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -56,6 +59,11 @@ export default function LoginPage() {
 
   return (
     <AuthCard title="Sign in to SECfinAPI">
+      {passwordReset && (
+        <p className="mb-4 rounded border border-green-500/20 bg-green-500/10 px-3 py-2 text-sm text-green-400">
+          Password updated — sign in with your new password.
+        </p>
+      )}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Input
           id="email"
@@ -106,5 +114,13 @@ export default function LoginPage() {
         </Link>
       </div>
     </AuthCard>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Spinner /></div>}>
+      <LoginContent />
+    </Suspense>
   )
 }

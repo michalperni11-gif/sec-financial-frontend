@@ -19,13 +19,11 @@ export const metadata: Metadata = {
     url: 'https://secfinapi.com',
     siteName: 'SECfinAPI',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'SECfinAPI' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'SECfinAPI — Affordable SEC Financial Data API',
     description: '30 years of SEC EDGAR data. 10,000+ companies. Income statements, balance sheets, cash flows.',
-    images: ['/og-image.png'],
   },
   icons: {
     icon: '/favicon.svg',
