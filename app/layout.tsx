@@ -9,7 +9,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'SECfinapi — Affordable SEC Financial Data API',
+  title: 'SECfinAPI — Affordable SEC Financial Data API',
   description:
     '30 years of SEC EDGAR data. 2,800+ companies. Income statements, balance sheets, cash flows. Starts at $5/mo.',
 }

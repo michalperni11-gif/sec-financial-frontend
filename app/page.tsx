@@ -7,7 +7,7 @@ export default function ComingSoon() {
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
           </svg>
           <span className="text-xl font-black tracking-wide text-white">
-            SEC<span className="text-[#00d47e]">finapi</span>
+            SECfin<span className="text-[#00d47e]">API</span>
           </span>
         </div>
 
