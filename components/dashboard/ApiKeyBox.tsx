@@ -1,17 +1,6 @@
 'use client'
 import { useState } from 'react'
-
-const EyeIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-  </svg>
-)
-
-const EyeOffIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
-  </svg>
-)
+import { apiFetch, ApiError } from '@/lib/api'
 
 const CopyIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -25,17 +14,31 @@ const CheckIcon = () => (
   </svg>
 )
 
-export function ApiKeyBox({ apiKey }: { apiKey: string }) {
-  const [visible, setVisible] = useState(false)
-  const [copied, setCopied] = useState(false)
+const RefreshIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+  </svg>
+)
 
-  const display = visible
-    ? apiKey
-    : apiKey.slice(0, 8) + '••••••••••••••••' + apiKey.slice(-4)
+interface Props {
+  apiKey: string  // masked prefix from /auth/me, e.g. "sk_5e6ae8..."
+}
+
+export function ApiKeyBox({ apiKey }: Props) {
+  // newKey holds the full plain key only after a successful regenerate
+  const [newKey, setNewKey] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [confirming, setConfirming] = useState(false)
+
+  // The key we display: full if just regenerated, masked prefix otherwise
+  const displayKey = newKey ?? apiKey
 
   async function handleCopy() {
+    if (!newKey) return
     try {
-      await navigator.clipboard.writeText(apiKey)
+      await navigator.clipboard.writeText(newKey)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
@@ -43,30 +46,74 @@ export function ApiKeyBox({ apiKey }: { apiKey: string }) {
     }
   }
 
+  async function handleRegenerate() {
+    if (!confirming) {
+      setConfirming(true)
+      return
+    }
+    setConfirming(false)
+    setLoading(true)
+    setError('')
+    try {
+      const res = await apiFetch<{ api_key: string; tier: string }>('/auth/api-keys/regenerate', { method: 'POST' })
+      setNewKey(res.api_key)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Regeneration failed.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
-      <div className="mb-3 text-xs uppercase tracking-wider text-zinc-500">API Key</div>
-      <div className="flex items-center gap-2">
-        <code className="flex-1 overflow-hidden text-ellipsis rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-cyan-400 font-mono">
-          {display}
-        </code>
-        <button
-          onClick={() => setVisible((v) => !v)}
-          className="flex items-center justify-center rounded border border-zinc-800 p-2 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300 transition-colors"
-          title={visible ? 'Hide' : 'Show'}
-          aria-label={visible ? 'Hide API key' : 'Show API key'}
-        >
-          {visible ? <EyeOffIcon /> : <EyeIcon />}
-        </button>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 rounded border border-zinc-800 px-3 py-2 text-xs text-zinc-500 hover:border-zinc-600 hover:text-zinc-300 transition-colors"
-          aria-label="Copy API key"
-        >
-          {copied ? <CheckIcon /> : <CopyIcon />}
-          {copied ? 'Copied' : 'Copy'}
-        </button>
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-xs uppercase tracking-wider text-zinc-500">API Key</span>
+        {newKey && (
+          <span className="text-xs text-amber-400">Save this key — it won't be shown again</span>
+        )}
       </div>
+
+      <div className="flex items-center gap-2">
+        <code className="flex-1 overflow-hidden text-ellipsis rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-mono text-cyan-400">
+          {displayKey}
+        </code>
+
+        {newKey ? (
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 rounded border border-zinc-800 px-3 py-2 text-xs text-zinc-500 hover:border-zinc-600 hover:text-zinc-300 transition-colors"
+            aria-label="Copy API key"
+          >
+            {copied ? <CheckIcon /> : <CopyIcon />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        ) : (
+          <button
+            onClick={handleRegenerate}
+            disabled={loading}
+            className={`flex items-center gap-1.5 rounded border px-3 py-2 text-xs transition-colors disabled:opacity-50 ${
+              confirming
+                ? 'border-red-800 bg-red-950 text-red-400 hover:bg-red-900'
+                : 'border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
+            }`}
+            aria-label="Regenerate API key"
+          >
+            <RefreshIcon />
+            {loading ? 'Generating…' : confirming ? 'Confirm — old key dies' : 'Regenerate'}
+          </button>
+        )}
+      </div>
+
+      {!newKey && (
+        <p className="mt-2 text-xs text-zinc-600">
+          Full key shown once on registration and in your welcome email.
+          {confirming && (
+            <button onClick={() => setConfirming(false)} className="ml-2 text-zinc-500 underline">Cancel</button>
+          )}
+        </p>
+      )}
+
+      {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
     </div>
   )
 }
