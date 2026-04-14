@@ -19,6 +19,11 @@ function VerifyEmailContent() {
 
   useEffect(() => {
     if (!token) return
+    // Strip token from URL immediately — prevents it appearing in Vercel logs,
+    // browser history, and referrer headers.
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({}, '', '/verify-email')
+    }
     apiFetch<{ message: string; api_key: string; tier: string; access_token: string }>(
       `/auth/verify-email?token=${encodeURIComponent(token)}`
     )

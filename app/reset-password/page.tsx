@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { AuthCard } from '@/components/auth/AuthCard'
 import { Input } from '@/components/ui/Input'
@@ -15,6 +15,13 @@ function ResetPasswordContent() {
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Strip token from URL on mount — prevents it appearing in Vercel logs and browser history.
+  useEffect(() => {
+    if (token && typeof window !== 'undefined') {
+      window.history.replaceState({}, '', '/reset-password')
+    }
+  }, [token])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
