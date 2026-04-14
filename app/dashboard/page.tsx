@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { apiFetch, ApiError } from '@/lib/api'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { ApiKeyBox } from '@/components/dashboard/ApiKeyBox'
@@ -39,6 +40,8 @@ const TIER_LABEL: Record<string, string> = {
 export default function DashboardPage() {
   const [user, setUser] = useState<MeResponse | null>(null)
   const [error, setError] = useState('')
+  const searchParams = useSearchParams()
+  const upgraded = searchParams.get('upgraded') === 'true'
 
   useEffect(() => {
     apiFetch<MeResponse>('/auth/me')
@@ -65,6 +68,11 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
+      {upgraded && (
+        <div className="mb-6 rounded-lg border border-green-500/30 bg-green-500/10 px-5 py-3 text-sm text-green-400">
+          🎉 Upgrade successful! Your new plan is now active.
+        </div>
+      )}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-zinc-100">
           Welcome back, {user.name.split(' ')[0]}

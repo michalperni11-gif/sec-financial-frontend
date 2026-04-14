@@ -9,9 +9,28 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'SECbase — Affordable SEC Financial Data API',
+  title: 'SECfinAPI — Affordable SEC Financial Data API',
   description:
-    '30 years of SEC EDGAR data. 2,800+ companies. Income statements, balance sheets, cash flows. Starts at $5/mo.',
+    '30 years of SEC EDGAR data. 10,000+ companies. Income statements, balance sheets, cash flows. Starts at $5/mo.',
+  metadataBase: new URL('https://secfinapi.com'),
+  openGraph: {
+    title: 'SECfinAPI — Affordable SEC Financial Data API',
+    description: '30 years of SEC EDGAR data. 10,000+ companies. Income statements, balance sheets, cash flows. Starts at $5/mo.',
+    url: 'https://secfinapi.com',
+    siteName: 'SECfinAPI',
+    type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'SECfinAPI' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SECfinAPI — Affordable SEC Financial Data API',
+    description: '30 years of SEC EDGAR data. 10,000+ companies. Income statements, balance sheets, cash flows.',
+    images: ['/og-image.png'],
+  },
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
