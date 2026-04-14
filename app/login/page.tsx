@@ -14,10 +14,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [unverified, setUnverified] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendMsg, setResendMsg] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    setUnverified(false)
+    setResendMsg('')
     setLoading(true)
     try {
       const { access_token } = await apiFetch<{ access_token: string; token_type: string }>(
@@ -27,9 +32,30 @@ export default function LoginPage() {
       setToken(access_token)
       router.push('/dashboard')
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong.')
+      const msg = err instanceof ApiError ? err.message : 'Something went wrong.'
+      setError(msg)
+      // Show resend link when backend says email is not verified
+      if (err instanceof ApiError && err.status === 403) {
+        setUnverified(true)
+      }
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleResend() {
+    setResendLoading(true)
+    setResendMsg('')
+    try {
+      await apiFetch('/auth/resend-verification', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      })
+      setResendMsg('Verification email sent — check your inbox.')
+    } catch {
+      setResendMsg('Could not resend. Try again shortly.')
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -54,7 +80,24 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && (
+          <div>
+            <p className="text-sm text-red-400">{error}</p>
+            {unverified && (
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendLoading}
+                  className="text-sm text-cyan-400 hover:underline disabled:opacity-50"
+                >
+                  {resendLoading ? 'Sending…' : 'Resend verification email'}
+                </button>
+                {resendMsg && <p className="mt-1 text-xs text-zinc-400">{resendMsg}</p>}
+              </div>
+            )}
+          </div>
+        )}
         <Button type="submit" loading={loading} className="mt-2 w-full">
           Sign in
         </Button>

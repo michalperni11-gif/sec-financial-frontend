@@ -13,6 +13,8 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendMsg, setResendMsg] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -31,6 +33,22 @@ export default function RegisterPage() {
     }
   }
 
+  async function handleResend() {
+    setResendLoading(true)
+    setResendMsg('')
+    try {
+      await apiFetch('/auth/resend-verification', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      })
+      setResendMsg('Sent! Check your inbox.')
+    } catch {
+      setResendMsg('Could not resend. Try again shortly.')
+    } finally {
+      setResendLoading(false)
+    }
+  }
+
   if (success) {
     return (
       <AuthCard title="Check your email">
@@ -38,6 +56,17 @@ export default function RegisterPage() {
           We sent a verification link to <span className="text-zinc-200">{email}</span>.
           Click the link to activate your account and get your free API key.
         </p>
+        <div className="mt-5 border-t border-zinc-800 pt-4">
+          <p className="text-xs text-zinc-500 mb-2">Didn&apos;t receive it?</p>
+          <button
+            onClick={handleResend}
+            disabled={resendLoading}
+            className="text-sm text-cyan-400 hover:underline disabled:opacity-50"
+          >
+            {resendLoading ? 'Sending…' : 'Resend verification email'}
+          </button>
+          {resendMsg && <p className="mt-1 text-xs text-zinc-400">{resendMsg}</p>}
+        </div>
         <p className="mt-4 text-sm text-zinc-500">
           Already verified?{' '}
           <Link href="/login" className="text-cyan-400 hover:underline">

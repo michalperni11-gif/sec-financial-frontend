@@ -9,6 +9,25 @@ import { setToken } from '@/lib/auth'
 
 type State = 'loading' | 'success' | 'error' | 'missing'
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch { /* ignore */ }
+  }
+  return (
+    <button
+      onClick={copy}
+      className="mt-2 w-full rounded border border-zinc-700 py-1.5 text-xs text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-colors"
+    >
+      {copied ? '✓ Copied' : 'Copy key'}
+    </button>
+  )
+}
+
 function VerifyEmailContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -53,13 +72,14 @@ function VerifyEmailContent() {
   if (state === 'success') {
     return (
       <AuthCard title="Email verified ✓">
-        <p className="mb-4 text-sm text-zinc-400">Your account is active. Here is your free API key:</p>
+        <p className="mb-3 text-sm text-zinc-400">Your account is active. Save your free API key — it won&apos;t be shown again after you leave this page.</p>
         <code className="block rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs text-cyan-400 break-all">
           {apiKey}
         </code>
+        <CopyButton text={apiKey} />
         <button
           onClick={() => router.push('/dashboard')}
-          className="mt-6 block w-full rounded bg-cyan-400 py-2 text-center text-sm font-bold text-black hover:bg-cyan-300 transition-colors"
+          className="mt-4 block w-full rounded bg-cyan-400 py-2 text-center text-sm font-bold text-black hover:bg-cyan-300 transition-colors"
         >
           Go to dashboard →
         </button>
