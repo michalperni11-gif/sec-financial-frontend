@@ -1,15 +1,17 @@
 'use client'
 import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { AuthCard } from '@/components/auth/AuthCard'
 import { Spinner } from '@/components/ui/Spinner'
 import { apiFetch, ApiError } from '@/lib/api'
+import { setToken } from '@/lib/auth'
 
 type State = 'loading' | 'success' | 'error' | 'missing'
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const token = searchParams.get('token')
   const [state, setState] = useState<State>(token ? 'loading' : 'missing')
   const [apiKey, setApiKey] = useState('')
@@ -17,11 +19,16 @@ function VerifyEmailContent() {
 
   useEffect(() => {
     if (!token) return
-    apiFetch<{ message: string; api_key: string; tier: string }>(
+    apiFetch<{ message: string; api_key: string; tier: string; access_token: string }>(
       `/auth/verify-email?token=${encodeURIComponent(token)}`
     )
       .then((data) => {
         setApiKey(data.api_key)
+        // Auto-login: backend issues a JWT on verify so the user lands
+        // directly in the dashboard without a separate login step.
+        if (data.access_token) {
+          setToken(data.access_token)
+        }
         setState('success')
       })
       .catch((err) => {
@@ -45,12 +52,12 @@ function VerifyEmailContent() {
         <code className="block rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs text-cyan-400 break-all">
           {apiKey}
         </code>
-        <Link
-          href="/login"
+        <button
+          onClick={() => router.push('/dashboard')}
           className="mt-6 block w-full rounded bg-cyan-400 py-2 text-center text-sm font-bold text-black hover:bg-cyan-300 transition-colors"
         >
-          Sign in to dashboard →
-        </Link>
+          Go to dashboard →
+        </button>
       </AuthCard>
     )
   }

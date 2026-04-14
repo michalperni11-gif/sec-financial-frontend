@@ -134,7 +134,7 @@ export function ApiExplorer() {
     fetchData(ticker, ep)
   }
 
-  const path = `/company/${ticker}/${endpoint}`
+  const path = `/v1/company/${ticker}/${endpoint}`
 
   return (
     <section id="explorer" className="mx-auto max-w-6xl px-6 py-20">

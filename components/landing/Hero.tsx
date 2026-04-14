@@ -35,7 +35,7 @@ async function fetchIncome(): Promise<{ rows: IncomeRow[]; live: boolean }> {
 
   try {
     const base = process.env.NEXT_PUBLIC_API_URL ?? 'https://sec-financial-api-production.up.railway.app'
-    const res  = await fetch(`${base}/company/AAPL/income-statement`, {
+    const res  = await fetch(`${base}/v1/company/AAPL/income-statement`, {
       headers: { 'X-API-Key': key },
       next: { revalidate: 86400 },
     })
@@ -218,7 +218,7 @@ export async function Hero() {
             {/* Footer */}
             <div className="flex items-center justify-between border-t border-white/[0.05] bg-[#141414] px-4 py-2">
               <span className="text-xs text-zinc-700">Source: SEC EDGAR · Updated weekly</span>
-              <code className="text-xs text-[#00d47e]/60">GET /company/AAPL/income-statement</code>
+              <code className="text-xs text-[#00d47e]/60">GET /v1/company/AAPL/income-statement</code>
             </div>
           </div>
 

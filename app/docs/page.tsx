@@ -3,12 +3,12 @@ import { Navbar } from '@/components/landing/Navbar'
 import { Footer } from '@/components/landing/Footer'
 
 const ENDPOINTS = [
-  { method: 'GET', path: '/company/{ticker}/income-statement', desc: 'Annual/quarterly income statement' },
-  { method: 'GET', path: '/company/{ticker}/balance-sheet', desc: 'Balance sheet' },
-  { method: 'GET', path: '/company/{ticker}/cash-flow', desc: 'Cash flow statement' },
-  { method: 'GET', path: '/company/{ticker}/metrics', desc: 'Key financial ratios' },
-  { method: 'GET', path: '/company/{ticker}/info', desc: 'Company metadata' },
-  { method: 'GET', path: '/companies', desc: 'List all indexed companies' },
+  { method: 'GET', path: '/v1/company/{ticker}/income-statement', desc: 'Annual/quarterly income statement' },
+  { method: 'GET', path: '/v1/company/{ticker}/balance-sheet', desc: 'Balance sheet' },
+  { method: 'GET', path: '/v1/company/{ticker}/cash-flow', desc: 'Cash flow statement' },
+  { method: 'GET', path: '/v1/company/{ticker}/metrics', desc: 'Key financial ratios' },
+  { method: 'GET', path: '/v1/company/{ticker}/info', desc: 'Company metadata' },
+  { method: 'GET', path: '/v1/companies', desc: 'List all indexed companies' },
 ]
 
 export default function DocsPage() {
@@ -36,7 +36,7 @@ export default function DocsPage() {
             </li>
             <li>
               <span className="font-semibold text-zinc-200">3. Make your first request</span>
-              <pre className="mt-2 overflow-x-auto rounded border border-zinc-800 bg-zinc-900 p-4 text-xs text-cyan-400">{`curl "https://sec-financial-api-production.up.railway.app/company/AAPL/income-statement" \\
+              <pre className="mt-2 overflow-x-auto rounded border border-zinc-800 bg-zinc-900 p-4 text-xs text-cyan-400">{`curl "https://sec-financial-api-production.up.railway.app/v1/company/AAPL/income-statement" \\
   -H "X-API-Key: YOUR_API_KEY"`}</pre>
             </li>
           </ol>
@@ -46,7 +46,7 @@ export default function DocsPage() {
         <section className="mb-12">
           <h2 className="mb-4 text-lg font-bold text-zinc-100">Authentication</h2>
           <p className="mb-3 text-sm text-zinc-400">
-            Pass your API key in the <code className="rounded bg-zinc-800 px-1 text-cyan-400">Authorization</code> header:
+            Pass your API key in the <code className="rounded bg-zinc-800 px-1 text-cyan-400">X-API-Key</code> header:
           </p>
           <pre className="overflow-x-auto rounded border border-zinc-800 bg-zinc-900 p-4 text-xs text-cyan-400">{`X-API-Key: sk_live_your_key_here`}</pre>
         </section>

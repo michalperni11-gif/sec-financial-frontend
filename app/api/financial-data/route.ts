@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server'
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://sec-financial-api-production.up.railway.app'
 
 const VALID_ENDPOINTS = ['income-statement', 'balance-sheet', 'cash-flow', 'metrics', 'info'] as const
-const TICKER_RE = /^[A-Z.]{1,6}$/
+const TICKER_RE = /^[A-Z0-9.\-]{1,10}$/
 
 export async function GET(req: NextRequest) {
   const key = process.env.SECBASE_DEMO_KEY
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const upstream = await fetch(`${BASE}/company/${ticker}/${endpoint}`, {
+    const upstream = await fetch(`${BASE}/v1/company/${ticker}/${endpoint}`, {
       headers: { 'X-API-Key': key },
       next: { revalidate: 86400 }, // cache 24 h on the server
     })
