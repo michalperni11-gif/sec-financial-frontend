@@ -67,7 +67,7 @@ async function fetchIncome(): Promise<{ rows: IncomeRow[]; live: boolean }> {
 
 const STATS = [
   {
-    value: '2,800+',
+    value: '10,000+',
     label: 'Companies',
     sub: 'Full market coverage',
     icon: (
