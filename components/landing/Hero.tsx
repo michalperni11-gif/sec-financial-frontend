@@ -245,7 +245,6 @@ export async function Hero() {
 
       {/* ── Stats row ───────────────────────────────── */}
       <div
-        id="features"
         className="animate-fade-up animate-delay-5 mt-16 grid grid-cols-1 gap-px bg-white/[0.05] sm:grid-cols-3"
       >
         {STATS.map((s) => (
