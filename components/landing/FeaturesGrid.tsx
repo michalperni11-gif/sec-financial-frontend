@@ -6,7 +6,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Standardized Concepts',
-    desc: 'Every company uses different XBRL tags. We map 1,000+ raw SEC tags to clean, consistent field names — Revenue is always Revenue.',
+    desc: '250+ XBRL tag aliases mapped to consistent field names. Revenue is always Revenue — whether Apple files "RevenueFromContractWithCustomer" or an older filer uses "SalesRevenueNet".',
   },
   {
     icon: (
@@ -14,8 +14,8 @@ const FEATURES = [
         <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
       </svg>
     ),
-    title: '2,800+ Companies',
-    desc: 'Full S&P 500, Russell 1000, and Russell 3000 coverage. All sourced directly from SEC EDGAR filings — no data vendors in the middle.',
+    title: '10,000+ Companies',
+    desc: 'Every US public company that files with the SEC — S&P 500, Russell 3000, and beyond. All sourced directly from EDGAR XBRL filings with no data vendors in the middle.',
   },
   {
     icon: (
@@ -24,25 +24,25 @@ const FEATURES = [
       </svg>
     ),
     title: '30 Years of History',
-    desc: 'Income statements, balance sheets, and cash flows going back to the mid-1990s. Every 10-K and 10-Q ever filed with the SEC.',
+    desc: 'Every 10-K and 10-Q ever filed with the SEC, going back to the mid-1990s. Annual, quarterly, and trailing-twelve-month (TTM) views included.',
   },
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
     ),
-    title: 'Simple REST API',
-    desc: 'One endpoint per statement. Clean JSON response. No SDKs required — if you can curl it, you can use it. Built for developers.',
+    title: 'Industry-Aware',
+    desc: 'Banks show NIM, efficiency ratio, and loan-to-deposit. REITs show FFO and NOI. Insurers show loss ratio and combined ratio. Industry-specific metrics computed automatically from SIC code.',
   },
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
       </svg>
     ),
-    title: 'Weekly Refresh',
-    desc: 'Data updated weekly as new SEC filings come in. New 10-Ks and 10-Qs are ingested automatically — no manual syncing needed.',
+    title: '39 Pre-Computed Metrics',
+    desc: 'ROIC, debt/EBITDA, FCF margin, interest coverage, receivables turnover, and more — all calculated and ready. No spreadsheet formulas needed.',
   },
   {
     icon: (
@@ -51,7 +51,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Low Cost',
-    desc: 'Free tier for 100 req/day. Paid plans start at $5/mo. No per-query pricing, no seat licenses, no Bloomberg-style contracts.',
+    desc: 'Free tier for 100 req/day. Paid plans from $5/mo. No per-query pricing, no seat licenses, no Bloomberg-style contracts. Built for developers, priced like it.',
   },
 ]
 

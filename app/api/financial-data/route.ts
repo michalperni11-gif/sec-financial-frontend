@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://sec-financial-api-production.up.railway.app'
 
-const VALID_ENDPOINTS = ['income-statement', 'balance-sheet', 'cash-flow', 'metrics', 'info'] as const
+const VALID_ENDPOINTS = ['income-statement', 'balance-sheet', 'cash-flow', 'metrics', 'financials', 'info'] as const
 const TICKER_RE = /^[A-Z0-9.\-]{1,10}$/
 
 export async function GET(req: NextRequest) {
