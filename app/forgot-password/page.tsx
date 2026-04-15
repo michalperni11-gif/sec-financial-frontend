@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
         <p className="text-sm text-zinc-400">
           If <span className="text-zinc-200">{email}</span> is registered, we sent a password reset link. Check your inbox.
         </p>
-        <Link href="/login" className="mt-4 block text-sm text-cyan-400 hover:underline">
+        <Link href="/login" className="mt-4 block text-sm text-[#00d47e] hover:underline">
           ← Back to sign in
         </Link>
       </AuthCard>

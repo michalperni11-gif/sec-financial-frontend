@@ -172,8 +172,8 @@ export async function Hero() {
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className={`h-1.5 w-1.5 rounded-full ${live ? 'live-dot bg-[#00d47e]' : 'bg-zinc-600'}`} />
-                <span className="text-xs text-zinc-600 tracking-wider">{live ? 'LIVE' : 'CACHED'}</span>
+                <span className={`h-1.5 w-1.5 rounded-full ${live ? 'live-dot bg-[#00d47e]' : 'bg-zinc-500'}`} />
+                <span className="text-xs text-zinc-500 tracking-wider">{live ? 'LIVE' : 'CACHED'}</span>
               </div>
             </div>
 
@@ -181,11 +181,11 @@ export async function Hero() {
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-white/[0.05] bg-[#161616]">
-                  <th className="px-4 py-2.5 text-left font-medium uppercase tracking-widest text-zinc-600">Period</th>
-                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-600">Revenue</th>
-                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-600">Gross</th>
-                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-600">Net Inc.</th>
-                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-600">EPS</th>
+                  <th className="px-4 py-2.5 text-left font-medium uppercase tracking-widest text-zinc-500">Period</th>
+                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-500">Revenue</th>
+                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-500">Gross</th>
+                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-500">Net Inc.</th>
+                  <th className="px-3 py-2.5 text-right font-medium uppercase tracking-widest text-zinc-500">EPS</th>
                 </tr>
               </thead>
               <tbody>
@@ -217,7 +217,7 @@ export async function Hero() {
 
             {/* Footer */}
             <div className="flex items-center justify-between border-t border-white/[0.05] bg-[#141414] px-4 py-2">
-              <span className="text-xs text-zinc-700">Source: SEC EDGAR · Updated weekly</span>
+              <span className="text-xs text-zinc-500">Source: SEC EDGAR · Updated weekly</span>
               <code className="text-xs text-[#00d47e]/60">GET /v1/company/AAPL/income-statement</code>
             </div>
           </div>
@@ -226,7 +226,7 @@ export async function Hero() {
           <div className="mt-1.5 grid grid-cols-3 gap-px bg-white/[0.05]">
             {miniMetrics.map((m) => (
               <div key={m.label} className="bg-[#1a1a1a] px-3 py-3 transition-colors hover:bg-[#1e1e1e]">
-                <div className="mb-1 text-xs uppercase tracking-widest text-zinc-600">{m.label}</div>
+                <div className="mb-1 text-xs uppercase tracking-widest text-zinc-500">{m.label}</div>
                 <div className="flex items-baseline gap-2">
                   <span className={`text-sm font-bold tabular-nums ${
                     m.change
@@ -253,7 +253,7 @@ export async function Hero() {
             <div>
               <div className="text-xl font-black text-white">{s.value}</div>
               <div className="mt-0.5 text-sm font-semibold text-zinc-300">{s.label}</div>
-              <div className="mt-0.5 text-xs text-zinc-600">{s.sub}</div>
+              <div className="mt-0.5 text-xs text-zinc-500">{s.sub}</div>
             </div>
           </div>
         ))}

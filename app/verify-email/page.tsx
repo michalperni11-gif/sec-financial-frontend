@@ -73,13 +73,13 @@ function VerifyEmailContent() {
     return (
       <AuthCard title="Email verified ✓">
         <p className="mb-3 text-sm text-zinc-400">Your account is active. Save your free API key — it won&apos;t be shown again after you leave this page.</p>
-        <code className="block rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs text-cyan-400 break-all">
+        <code className="block border border-white/[0.08] bg-[#111111] px-3 py-2 text-xs text-[#00d47e] break-all">
           {apiKey}
         </code>
         <CopyButton text={apiKey} />
         <button
           onClick={() => router.push('/dashboard')}
-          className="mt-4 block w-full rounded bg-cyan-400 py-2 text-center text-sm font-bold text-black hover:bg-cyan-300 transition-colors"
+          className="mt-4 block w-full bg-[#00d47e] py-2 text-center text-sm font-bold text-black hover:bg-[#00f090] transition-colors"
         >
           Go to dashboard →
         </button>
@@ -91,7 +91,7 @@ function VerifyEmailContent() {
     return (
       <AuthCard title="Verification failed">
         <p className="mb-4 text-sm text-red-400">{errorMsg}</p>
-        <Link href="/register" className="text-sm text-cyan-400 hover:underline">Register again</Link>
+        <Link href="/register" className="text-sm text-[#00d47e] hover:underline">Register again</Link>
       </AuthCard>
     )
   }

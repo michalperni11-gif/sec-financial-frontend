@@ -12,7 +12,7 @@ export default function TermsPage() {
       <Navbar />
       <main className="mx-auto max-w-2xl px-6 pb-24 pt-28">
         <h1 className="mb-2 text-3xl font-black text-zinc-100">Terms of Service</h1>
-        <p className="mb-10 text-xs text-zinc-600">Last updated: April 2026</p>
+        <p className="mb-10 text-xs text-zinc-500">Last updated: April 2026</p>
 
         <div className="flex flex-col gap-8 text-sm leading-relaxed text-zinc-400">
 
@@ -75,7 +75,7 @@ export default function TermsPage() {
         </div>
 
         <div className="mt-12 border-t border-white/[0.06] pt-8">
-          <Link href="/" className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">← Back to home</Link>
+          <Link href="/" className="text-xs text-zinc-500 hover:text-zinc-400 transition-colors">← Back to home</Link>
         </div>
       </main>
       <Footer />

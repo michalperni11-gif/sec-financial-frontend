@@ -21,18 +21,16 @@ const RefreshIcon = () => (
 )
 
 interface Props {
-  apiKey: string  // masked prefix from /auth/me, e.g. "sk_5e6ae8..."
+  apiKey: string
 }
 
 export function ApiKeyBox({ apiKey }: Props) {
-  // newKey holds the full plain key only after a successful regenerate
   const [newKey, setNewKey] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [confirming, setConfirming] = useState(false)
 
-  // The key we display: full if just regenerated, masked prefix otherwise
   const displayKey = newKey ?? apiKey
 
   async function handleCopy() {
@@ -65,23 +63,23 @@ export function ApiKeyBox({ apiKey }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
+    <div className="border border-white/[0.08] bg-[#1a1a1a] p-5">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-xs uppercase tracking-wider text-zinc-500">API Key</span>
         {newKey && (
-          <span className="text-xs text-amber-400">Save this key — it won't be shown again</span>
+          <span className="text-xs text-amber-400">Save this key — it won&apos;t be shown again</span>
         )}
       </div>
 
       <div className="flex items-center gap-2">
-        <code className="flex-1 overflow-hidden text-ellipsis rounded border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-mono text-cyan-400">
+        <code className="flex-1 overflow-hidden text-ellipsis border border-white/[0.06] bg-[#111111] px-3 py-2 text-xs font-mono text-[#00d47e]">
           {displayKey}
         </code>
 
         {newKey ? (
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 rounded border border-zinc-800 px-3 py-2 text-xs text-zinc-500 hover:border-zinc-600 hover:text-zinc-300 transition-colors"
+            className="flex items-center gap-1.5 border border-white/[0.08] px-3 py-2 text-xs text-zinc-500 hover:border-white/20 hover:text-zinc-300 transition-colors"
             aria-label="Copy API key"
           >
             {copied ? <CheckIcon /> : <CopyIcon />}
@@ -91,10 +89,10 @@ export function ApiKeyBox({ apiKey }: Props) {
           <button
             onClick={handleRegenerate}
             disabled={loading}
-            className={`flex items-center gap-1.5 rounded border px-3 py-2 text-xs transition-colors disabled:opacity-50 ${
+            className={`flex items-center gap-1.5 border px-3 py-2 text-xs transition-colors disabled:opacity-50 ${
               confirming
                 ? 'border-red-800 bg-red-950 text-red-400 hover:bg-red-900'
-                : 'border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
+                : 'border-white/[0.08] text-zinc-500 hover:border-white/20 hover:text-zinc-300'
             }`}
             aria-label="Regenerate API key"
           >
@@ -105,7 +103,7 @@ export function ApiKeyBox({ apiKey }: Props) {
       </div>
 
       {!newKey && (
-        <p className="mt-2 text-xs text-zinc-600">
+        <p className="mt-2 text-xs text-zinc-500">
           Full key shown once on registration and in your welcome email.
           {confirming && (
             <button onClick={() => setConfirming(false)} className="ml-2 text-zinc-500 underline">Cancel</button>

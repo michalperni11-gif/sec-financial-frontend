@@ -213,7 +213,7 @@ export function ApiExplorer() {
           {/* Sidebar */}
           <div className="border-b border-white/[0.06] lg:border-b-0 lg:border-r lg:border-white/[0.06]">
             <div className="border-b border-white/[0.06] p-3">
-              <div className="mb-2 px-2 text-xs uppercase tracking-widest text-zinc-600">Endpoint</div>
+              <div className="mb-2 px-2 text-xs uppercase tracking-widest text-zinc-500">Endpoint</div>
               <div className="flex flex-col gap-0.5">
                 {ENDPOINTS.map((ep) => (
                   <button
@@ -232,7 +232,7 @@ export function ApiExplorer() {
             </div>
 
             <div className="p-3">
-              <div className="mb-2 px-2 text-xs uppercase tracking-widest text-zinc-600">Ticker</div>
+              <div className="mb-2 px-2 text-xs uppercase tracking-widest text-zinc-500">Ticker</div>
               <div className="flex flex-col gap-0.5">
                 {TICKERS.map((t) => (
                   <button
@@ -247,7 +247,7 @@ export function ApiExplorer() {
                     <span className="flex items-center justify-between gap-2">
                       {t}
                       {BANK_TICKERS.has(t) && (
-                        <span className="text-[9px] font-normal tracking-normal text-zinc-600 normal-case">bank</span>
+                        <span className="text-[9px] font-normal tracking-normal text-zinc-500 normal-case">bank</span>
                       )}
                     </span>
                   </button>
@@ -264,7 +264,7 @@ export function ApiExplorer() {
       </div>
 
       {/* Note for bank-specific fields */}
-      <p className="mt-3 text-xs text-zinc-600">
+      <p className="mt-3 text-xs text-zinc-500">
         JPM shows bank-specific fields (NetInterestIncome, ProvisionForCreditLosses, TotalDeposits) — standardized automatically by industry.
         Metrics marked <code className="text-zinc-500">null</code> are not applicable to financial institutions.
       </p>

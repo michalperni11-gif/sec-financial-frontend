@@ -128,15 +128,15 @@ export function PricingTable() {
               <div className={`text-3xl font-black tabular-nums leading-none ${tier.highlight ? 'text-[#00d47e]' : 'text-white'}`}>
                 {tier.price}
               </div>
-              <div className="mt-1 text-xs text-zinc-600">{tier.period}</div>
-              <div className="mt-1.5 text-xs text-zinc-700">{tier.rateLimit}</div>
+              <div className="mt-1 text-xs text-zinc-400">{tier.period}</div>
+              <div className="mt-1.5 text-xs text-zinc-500">{tier.rateLimit}</div>
             </div>
 
             {/* Features */}
             <ul className="mb-6 flex flex-col gap-2 text-xs">
               {tier.features.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-zinc-400">
-                  <span className={`mt-0.5 shrink-0 ${tier.highlight ? 'text-[#00d47e]' : 'text-zinc-600'}`}>
+                  <span className={`mt-0.5 shrink-0 ${tier.highlight ? 'text-[#00d47e]' : 'text-zinc-400'}`}>
                     <CheckIcon />
                   </span>
                   {f}

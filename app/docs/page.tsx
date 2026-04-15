@@ -40,15 +40,72 @@ const ENDPOINTS = [
   {
     method: 'GET',
     path: '/v1/company/{ticker}/metrics',
-    desc: '39 pre-computed ratios: margins, ROIC, FCF metrics, leverage, efficiency, and industry-specific metrics (NIM for banks, FFO for REITs, combined ratio for insurers).',
+    desc: 'Pre-computed ratios: margins, ROIC, owner earnings, FCF metrics, leverage, efficiency, and industry-specific metrics (NIM for banks, FFO for REITs, combined ratio for insurers).',
+    params: [],
+  },
+  {
+    method: 'GET',
+    path: '/v1/company/{ticker}/scores',
+    desc: 'Piotroski F-Score (0–9 signals across profitability, leverage, efficiency) and Altman Z\'-Score for financial health and distress risk.',
+    params: [],
+  },
+  {
+    method: 'GET',
+    path: '/v1/company/{ticker}/income-statement/growth',
+    desc: 'Year-over-year growth rates (%) for every income statement concept.',
+    params: [],
+  },
+  {
+    method: 'GET',
+    path: '/v1/company/{ticker}/balance-sheet/growth',
+    desc: 'Year-over-year growth rates (%) for every balance sheet concept.',
+    params: [],
+  },
+  {
+    method: 'GET',
+    path: '/v1/company/{ticker}/cash-flow/growth',
+    desc: 'Year-over-year growth rates (%) for every cash flow concept.',
+    params: [],
+  },
+  {
+    method: 'GET',
+    path: '/v1/company/{ticker}/filings',
+    desc: 'List of SEC filings (10-K, 10-Q) with accession numbers, filing dates, and report periods.',
     params: [
-      { name: 'period', type: 'string', default: 'annual', desc: 'annual | quarterly | ttm' },
+      { name: 'limit', type: 'integer', default: '20', desc: 'Max filings to return' },
+    ],
+  },
+  {
+    method: 'GET',
+    path: '/v1/company/{ticker}/peers',
+    desc: 'Companies in the same SIC industry group.',
+    params: [],
+  },
+  {
+    method: 'GET',
+    path: '/v1/screen',
+    desc: 'Screen companies by financial metrics. Supports 15+ filters: gross_margin_min/max, net_margin_min, roic_min, revenue_min, fcf_min, debt_to_ebitda_max, current_ratio_min, and more.',
+    params: [
+      { name: 'index', type: 'string', default: '', desc: 'sp500 | russell1000 | russell3000' },
+      { name: 'gross_margin_min', type: 'number', default: '', desc: 'Min gross margin %' },
+      { name: 'roic_min', type: 'number', default: '', desc: 'Min ROIC %' },
+      { name: 'revenue_min', type: 'number', default: '', desc: 'Min annual revenue (absolute $)' },
+      { name: 'limit', type: 'integer', default: '50', desc: '1–500' },
+    ],
+  },
+  {
+    method: 'GET',
+    path: '/v1/companies/metrics',
+    desc: 'Bulk pre-computed metrics for all companies in an index — single call, no per-request joins.',
+    params: [
+      { name: 'index', type: 'string', default: 'sp500', desc: 'sp500 | russell1000 | russell3000' },
+      { name: 'limit', type: 'integer', default: '500', desc: 'Max companies to return' },
     ],
   },
   {
     method: 'GET',
     path: '/v1/company/{ticker}/info',
-    desc: 'Company metadata: CIK, SIC code, industry type, fiscal year end, index membership, last ingested date.',
+    desc: 'Company metadata: CIK, name, SIC code, industry, exchange, city, state of incorporation, fiscal year end, index membership, and last ingested date.',
     params: [],
   },
   {
@@ -149,7 +206,7 @@ export default function DocsPage() {
             All monetary values are in the company&apos;s reporting currency (usually USD), in absolute dollars.
           </p>
           <pre className="overflow-x-auto rounded border border-zinc-800 bg-[#0d0d0d] p-4 text-xs text-[#00d47e] leading-relaxed">{RESPONSE_EXAMPLE}</pre>
-          <p className="mt-3 text-xs text-zinc-600">
+          <p className="mt-3 text-xs text-zinc-400">
             <code>period_metadata</code> provides per-period context: currency, SEC filing date, form type, and fiscal year.
           </p>
         </section>
@@ -160,7 +217,7 @@ export default function DocsPage() {
           <p className="mb-1 text-sm text-zinc-500">
             Base URL: <code className="text-zinc-300">{BASE_URL}</code>
           </p>
-          <p className="mb-6 text-xs text-zinc-600">
+          <p className="mb-6 text-xs text-zinc-400">
             Interactive reference (Swagger UI):{' '}
             <a href={`${BASE_URL}/docs`} target="_blank" rel="noopener noreferrer" className="text-[#00d47e] hover:underline">
               {BASE_URL}/docs
@@ -184,9 +241,9 @@ export default function DocsPage() {
                       {ep.params.map((p) => (
                         <div key={p.name} className="flex items-baseline gap-2 text-xs">
                           <code className="w-20 flex-shrink-0 text-zinc-400">{p.name}</code>
-                          <span className="text-zinc-700">{p.type}</span>
-                          <span className="text-zinc-600 flex-1">{p.desc}</span>
-                          {p.default && <span className="text-zinc-700">default: {p.default}</span>}
+                          <span className="text-zinc-500">{p.type}</span>
+                          <span className="text-zinc-400 flex-1">{p.desc}</span>
+                          {p.default && <span className="text-zinc-500">default: {p.default}</span>}
                         </div>
                       ))}
                     </div>
@@ -215,7 +272,7 @@ export default function DocsPage() {
         <section className="mb-12">
           <h2 className="mb-4 text-lg font-bold text-zinc-100">Metrics endpoint</h2>
           <p className="mb-3 text-sm text-zinc-400">
-            The <code className="rounded bg-zinc-800 px-1 text-zinc-300">/metrics</code> endpoint returns 39 pre-computed ratios.
+            The <code className="rounded bg-zinc-800 px-1 text-zinc-300">/metrics</code> endpoint returns pre-computed ratios based on the latest annual filing.
             Industry-specific fields are populated automatically based on SIC code — non-applicable fields return <code className="rounded bg-zinc-800 px-1 text-zinc-300">null</code>.
           </p>
           <pre className="overflow-x-auto rounded border border-zinc-800 bg-[#0d0d0d] p-4 text-xs text-[#00d47e] leading-relaxed">{METRICS_EXAMPLE}</pre>
@@ -228,7 +285,7 @@ export default function DocsPage() {
             ].map(([label, metrics]) => (
               <div key={label} className="rounded border border-zinc-800 bg-[#0d0d0d] p-3">
                 <div className="mb-1 text-xs font-bold text-[#00d47e]">{label}</div>
-                <div className="text-zinc-600 leading-relaxed">{metrics}</div>
+                <div className="text-zinc-400 leading-relaxed">{metrics}</div>
               </div>
             ))}
           </div>
@@ -292,7 +349,7 @@ GET /v1/companies?index=russell3000&limit=100&offset=200`}</pre>
               ['400', 'Bad request — invalid ticker format or parameter value'],
               ['401', 'Missing or invalid API key'],
               ['403', 'Tier does not cover this company (upgrade required)'],
-              ['404', 'Company not yet ingested — try POST /v1/ingest/{ticker}'],
+              ['404', 'Company not found — not yet indexed or ticker not recognised'],
               ['422', 'Validation error — check query parameters'],
               ['429', 'Rate limit exceeded'],
               ['503', 'Database busy during ingestion — retry in a moment'],
@@ -305,7 +362,7 @@ GET /v1/companies?index=russell3000&limit=100&offset=200`}</pre>
           </div>
         </section>
 
-        <div className="rounded-lg border border-zinc-800 bg-[#0d0d0d] p-5 text-center">
+        <div className="border border-white/[0.08] bg-[#1a1a1a] p-5 text-center">
           <p className="mb-3 text-sm text-zinc-400">Ready to get started?</p>
           <Link
             href="/register"

@@ -61,7 +61,7 @@ export default function RegisterPage() {
           <button
             onClick={handleResend}
             disabled={resendLoading}
-            className="text-sm text-cyan-400 hover:underline disabled:opacity-50"
+            className="text-sm text-[#00d47e] hover:underline disabled:opacity-50"
           >
             {resendLoading ? 'Sending…' : 'Resend verification email'}
           </button>
@@ -69,7 +69,7 @@ export default function RegisterPage() {
         </div>
         <p className="mt-4 text-sm text-zinc-500">
           Already verified?{' '}
-          <Link href="/login" className="text-cyan-400 hover:underline">
+          <Link href="/login" className="text-[#00d47e] hover:underline">
             Sign in
           </Link>
         </p>
@@ -84,7 +84,7 @@ export default function RegisterPage() {
           id="name"
           label="Name"
           type="text"
-          placeholder="Michal"
+          placeholder="Your name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -115,7 +115,7 @@ export default function RegisterPage() {
       </form>
       <p className="mt-4 text-center text-sm text-zinc-500">
         Already have an account?{' '}
-        <Link href="/login" className="text-cyan-400 hover:underline">
+        <Link href="/login" className="text-[#00d47e] hover:underline">
           Sign in
         </Link>
       </p>

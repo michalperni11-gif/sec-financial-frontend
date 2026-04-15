@@ -89,7 +89,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleResend}
                   disabled={resendLoading}
-                  className="text-sm text-cyan-400 hover:underline disabled:opacity-50"
+                  className="text-sm text-[#00d47e] hover:underline disabled:opacity-50"
                 >
                   {resendLoading ? 'Sending…' : 'Resend verification email'}
                 </button>
@@ -106,7 +106,7 @@ export default function LoginPage() {
         <Link href="/forgot-password" className="text-zinc-500 hover:text-zinc-300 transition-colors">
           Forgot password?
         </Link>
-        <Link href="/register" className="text-cyan-400 hover:underline">
+        <Link href="/register" className="text-[#00d47e] hover:underline">
           Create account
         </Link>
       </div>

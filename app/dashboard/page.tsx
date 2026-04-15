@@ -95,7 +95,7 @@ export default function DashboardPage() {
         {user.api_key ? (
           <ApiKeyBox apiKey={user.api_key} />
         ) : (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5 text-sm text-zinc-500">
+          <div className="border border-white/[0.08] bg-[#1a1a1a] p-5 text-sm text-zinc-500">
             No API key yet — please verify your email first.
           </div>
         )}

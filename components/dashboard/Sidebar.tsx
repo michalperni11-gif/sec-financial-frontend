@@ -43,8 +43,8 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex w-56 flex-shrink-0 flex-col border-r border-zinc-800 bg-zinc-950 px-3 py-6">
-      <Link href="/" className="mb-8 px-3 text-sm font-black tracking-widest text-cyan-400">
+    <aside className="flex w-56 flex-shrink-0 flex-col border-r border-white/[0.06] bg-[#0d0d0d] px-3 py-6">
+      <Link href="/" className="mb-8 px-3 text-sm font-black tracking-widest text-white">
         SECfin<span className="text-[#00d47e]">API</span>
       </Link>
 
@@ -54,7 +54,7 @@ export function Sidebar() {
             <a
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
+              className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200 transition-colors"
             >
               {item.icon}
               {item.label}
@@ -64,10 +64,10 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+                'flex items-center gap-3 px-3 py-2 text-sm transition-colors',
                 pathname === item.href
-                  ? 'bg-zinc-800 text-zinc-100'
-                  : 'text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200'
+                  ? 'bg-white/[0.06] text-zinc-100'
+                  : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
               )}
             >
               {item.icon}
@@ -79,7 +79,7 @@ export function Sidebar() {
 
       <button
         onClick={handleLogout}
-        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-600 hover:text-zinc-400 transition-colors"
+        className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
       >
         <LogoutIcon />
         Sign out
