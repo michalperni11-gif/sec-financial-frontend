@@ -149,6 +149,7 @@ export function ApiExplorer() {
         if (!json.error) {
           setData(json)
           setIsLive(true)
+          setLoading(false)
           return
         }
       }
@@ -159,10 +160,6 @@ export function ApiExplorer() {
     setIsLive(false)
     setLoading(false)
   }, [])
-
-  useEffect(() => {
-    setLoading(false)
-  }, [data])
 
   const handleTicker = (t: string) => {
     setTicker(t)

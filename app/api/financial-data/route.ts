@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = req.nextUrl
   const ticker   = (searchParams.get('ticker')   ?? 'AAPL').toUpperCase()
-  const endpoint = searchParams.get('endpoint') ?? 'income-statement'
+  const endpoint = (searchParams.get('endpoint') ?? 'income-statement').toLowerCase()
 
   // Input validation — prevent SSRF / unexpected paths
   if (!TICKER_RE.test(ticker) || !VALID_ENDPOINTS.includes(endpoint as typeof VALID_ENDPOINTS[number])) {
