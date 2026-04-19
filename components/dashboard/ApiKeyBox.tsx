@@ -34,9 +34,8 @@ export function ApiKeyBox({ apiKey }: Props) {
   const displayKey = newKey ?? apiKey
 
   async function handleCopy() {
-    if (!newKey) return
     try {
-      await navigator.clipboard.writeText(newKey)
+      await navigator.clipboard.writeText(displayKey)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
@@ -76,16 +75,15 @@ export function ApiKeyBox({ apiKey }: Props) {
           {displayKey}
         </code>
 
-        {newKey ? (
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 border border-white/[0.08] px-3 py-2 text-xs text-zinc-500 hover:border-white/20 hover:text-zinc-300 transition-colors"
-            aria-label="Copy API key"
-          >
-            {copied ? <CheckIcon /> : <CopyIcon />}
-            {copied ? 'Copied' : 'Copy'}
-          </button>
-        ) : (
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 border border-white/[0.08] px-3 py-2 text-xs text-zinc-500 hover:border-white/20 hover:text-zinc-300 transition-colors"
+          aria-label="Copy API key"
+        >
+          {copied ? <CheckIcon /> : <CopyIcon />}
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+        {!newKey && (
           <button
             onClick={handleRegenerate}
             disabled={loading}

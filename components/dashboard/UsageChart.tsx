@@ -27,12 +27,12 @@ export function UsageChart() {
   const maxCount = Math.max(...data.map((d) => d.count), 1)
   const total = data.reduce((sum, d) => sum + d.count, 0)
 
-  const visible = data.slice(-14)
+  const visible = data.slice(-30)
 
   return (
     <div className="border border-white/[0.08] bg-[#1a1a1a] p-5">
       <div className="mb-4 flex items-center justify-between">
-        <span className="text-xs uppercase tracking-wider text-zinc-500">Requests — last 30 days</span>
+        <span className="text-xs uppercase tracking-wider text-zinc-500">Requests — last {visible.length} days</span>
         <span className="text-sm font-semibold text-zinc-300">{total.toLocaleString()} total</span>
       </div>
 

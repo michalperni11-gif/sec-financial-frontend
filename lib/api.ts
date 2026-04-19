@@ -35,7 +35,7 @@ export async function apiFetch<T>(
   if (res.status === 401) {
     clearToken()
     if (typeof window !== 'undefined') {
-      window.location.href = '/login'
+      window.location.replace('/login')
     }
     throw new ApiError(401, 'Unauthorized')
   }
