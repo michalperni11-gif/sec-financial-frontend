@@ -1,10 +1,10 @@
 import Link from 'next/link'
 
 const COLS = [
-  { title: 'Product', items: [['Pricing', '/#pricing'], ['Docs', '/docs'], ['Changelog', '/docs#changelog'], ['Status', '/'] ] },
-  { title: 'Resources', items: [['API reference', '/docs'], ['Quick start', '/docs#quick-start'], ['Examples', '/docs'], ['Postman', '/docs']] },
-  { title: 'Company', items: [['About', '/'], ['Blog', '/'], ['Contact', '/'], ['Brand', '/']] },
-  { title: 'Legal', items: [['Terms', '/terms'], ['Privacy', '/privacy'], ['DPA', '/'], ['Security', '/']] },
+  { title: 'Product', items: [['Pricing', '/#pricing'], ['Docs', '/docs'], ['Playground', '/playground']] },
+  { title: 'Resources', items: [['API reference', '/docs'], ['Quick start', '/docs'], ['Changelog', '/docs']] },
+  { title: 'Company', items: [['Contact', 'mailto:support@secfinapi.com']] },
+  { title: 'Legal', items: [['Terms', '/terms'], ['Privacy', '/privacy']] },
 ] as const
 
 export function Footer() {
@@ -44,15 +44,17 @@ export function Footer() {
               >
                 {col.title}
               </div>
-              {col.items.map(([label, href]) => (
-                <Link
-                  key={label}
-                  href={href}
-                  style={{ color: 'var(--fg-muted)', cursor: 'pointer' }}
-                >
-                  {label}
-                </Link>
-              ))}
+              {col.items.map(([label, href]) =>
+                href.startsWith('mailto:') || href.startsWith('http') ? (
+                  <a key={label} href={href} style={{ color: 'var(--fg-muted)' }}>
+                    {label}
+                  </a>
+                ) : (
+                  <Link key={label} href={href} style={{ color: 'var(--fg-muted)' }}>
+                    {label}
+                  </Link>
+                ),
+              )}
             </div>
           ))}
         </div>
