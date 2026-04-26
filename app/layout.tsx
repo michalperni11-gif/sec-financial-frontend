@@ -16,24 +16,68 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'SECfinAPI — Standardized SEC financial data, one API',
+  title: {
+    default: 'SECfinAPI — Standardized SEC financial data, one API',
+    template: '%s · SECfinAPI',
+  },
   description:
-    'Income statements, balance sheets, cash flow + 50 ratios for 10,000+ US public companies. Cleaned, normalized, ready to query.',
+    'REST API for SEC EDGAR financial data. Income statements, balance sheets, cash flow + 50 ratios for 10,000+ US public companies. Standardized GAAP, JSON, no XBRL parsing. Free tier — 100 requests/day.',
   metadataBase: new URL('https://secfinapi.com'),
+  applicationName: 'SECfinAPI',
+  authors: [{ name: 'SECfinAPI' }],
+  creator: 'SECfinAPI',
+  publisher: 'SECfinAPI',
+  keywords: [
+    'SEC EDGAR API',
+    'financial data API',
+    'XBRL',
+    'income statement API',
+    'balance sheet API',
+    'cash flow API',
+    'GAAP',
+    '10-K',
+    '10-Q',
+    'fundamentals API',
+    'stock financial data',
+    'company financials JSON',
+    'financial ratios API',
+    'fintech developer tools',
+  ],
+  alternates: {
+    canonical: 'https://secfinapi.com',
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
-    title: 'SECfinAPI — Standardized SEC financial data, one API',
-    description:
-      'Income statements, balance sheets, cash flow + 50 ratios for 10,000+ US public companies.',
+    type: 'website',
+    locale: 'en_US',
     url: 'https://secfinapi.com',
     siteName: 'SECfinAPI',
-    type: 'website',
+    title: 'SECfinAPI — Standardized SEC financial data, one API',
+    description:
+      'Income statements, balance sheets, cash flow + 50 ratios for 10,000+ US public companies. Cleaned, normalized, ready to query.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'SECfinAPI — SEC financial data, one API',
     description:
-      'Income statements, balance sheets, cash flow + 50 ratios for 10,000+ US public companies.',
+      'Standardized SEC EDGAR financials for 10,000+ US public companies. JSON over REST.',
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-snippet': -1,
+      'max-image-preview': 'large',
+      'max-video-preview': -1,
+    },
+  },
+  category: 'technology',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

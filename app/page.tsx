@@ -1,4 +1,5 @@
 import { TopNav } from '@/components/layout/TopNav'
+import { StructuredData } from '@/components/seo/StructuredData'
 import { Hero } from '@/components/landing-v2/Hero'
 import { DemoWidget } from '@/components/landing-v2/DemoWidget'
 import { Features } from '@/components/landing-v2/Features'
@@ -39,6 +40,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <StructuredData />
       <TopNav />
       <main>
         <Hero companyCount={stats.companies} />
