@@ -19,7 +19,7 @@ interface ApiResponse {
   error?: string
 }
 
-const SUGGESTED = ['AAPL', 'A', 'AAL', 'ABBV', 'ABNB']
+const SUGGESTED = ['AAPL', 'AMZN', 'ADBE', 'AMD', 'BAC']
 
 function num(v: unknown): number | undefined {
   if (typeof v === 'number' && Number.isFinite(v)) return v
