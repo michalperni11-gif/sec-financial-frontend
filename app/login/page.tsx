@@ -1,43 +1,51 @@
 'use client'
-import { useState } from 'react'
+
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { AuthCard } from '@/components/auth/AuthCard'
-import { Input } from '@/components/ui/Input'
-import { Button } from '@/components/ui/Button'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { TopNav } from '@/components/layout/TopNav'
+import { AuthShell } from '@/components/ui/AuthShell'
+import { FormField } from '@/components/ui/FormField'
+import { Icons } from '@/components/ui/Icons'
+import { useToast } from '@/components/ui/Toast'
 import { apiFetch, ApiError } from '@/lib/api'
 import { setToken } from '@/lib/auth'
 
-export default function LoginPage() {
+function LoginInner() {
   const router = useRouter()
+  const params = useSearchParams()
+  const next = params.get('next') ?? '/dashboard'
+  const wasReset = params.get('reset') === '1'
+  const toast = useToast()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<{ email?: string; password?: string; submit?: string }>({})
   const [loading, setLoading] = useState(false)
   const [unverified, setUnverified] = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
-  const [resendMsg, setResendMsg] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setError('')
-    setUnverified(false)
-    setResendMsg('')
+    const errs: typeof errors = {}
+    if (!email.includes('@')) errs.email = 'Enter a valid email'
+    if (password.length < 8) errs.password = 'Password must be at least 8 characters'
+    setErrors(errs)
+    if (Object.keys(errs).length) return
+
     setLoading(true)
+    setUnverified(false)
     try {
-      const { access_token } = await apiFetch<{ access_token: string; token_type: string }>(
-        '/auth/login',
-        { method: 'POST', body: JSON.stringify({ email, password }) }
-      )
+      const { access_token } = await apiFetch<{ access_token: string }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      })
       setToken(access_token)
-      router.push('/dashboard')
+      toast({ kind: 'success', message: 'Signed in' })
+      router.push(next)
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : 'Something went wrong.'
-      setError(msg)
-      // Show resend link when backend says email is not verified
-      if (err instanceof ApiError && err.status === 403) {
-        setUnverified(true)
-      }
+      setErrors({ submit: msg })
+      if (err instanceof ApiError && err.status === 403) setUnverified(true)
     } finally {
       setLoading(false)
     }
@@ -45,76 +53,119 @@ export default function LoginPage() {
 
   async function handleResend() {
     setResendLoading(true)
-    setResendMsg('')
     try {
       await apiFetch('/auth/resend-verification', {
         method: 'POST',
         body: JSON.stringify({ email }),
       })
-      setResendMsg('Verification email sent — check your inbox.')
+      toast({ kind: 'success', message: 'Verification email sent — check your inbox.' })
     } catch {
-      setResendMsg('Could not resend. Try again shortly.')
+      toast({ kind: 'error', message: 'Could not resend. Try again shortly.' })
     } finally {
       setResendLoading(false)
     }
   }
 
   return (
-    <AuthCard title="Sign in to SECfinAPI">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Input
-          id="email"
-          label="Email"
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Input
-          id="password"
-          label="Password"
-          type="password"
-          placeholder="Your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        {error && (
-          <div className="flex flex-col gap-2 border border-red-500/30 bg-red-500/10 px-3 py-2.5">
-            <div className="flex items-start gap-2.5">
-              <svg xmlns="http://www.w3.org/2000/svg" className="mt-0.5 h-4 w-4 shrink-0 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <p className="text-sm text-red-400">{error}</p>
-            </div>
+    <AuthShell
+      title="Sign in to SECfinAPI"
+      subtitle="Welcome back. Enter your credentials."
+      footer={
+        <span>
+          Don&apos;t have an account?{' '}
+          <Link href="/register" style={{ color: 'var(--accent)' }}>
+            Create one
+          </Link>
+        </span>
+      }
+    >
+      {wasReset && (
+        <div
+          className="badge badge-positive"
+          style={{ marginBottom: 16, padding: '8px 12px', width: '100%', justifyContent: 'center' }}
+        >
+          <Icons.Check size={13} /> Password updated — sign in with your new password.
+        </div>
+      )}
+      <form onSubmit={handleSubmit}>
+        <FormField label="Email" error={errors.email}>
+          <input
+            className="input"
+            type="email"
+            autoFocus
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="you@company.com"
+            required
+          />
+        </FormField>
+        <FormField label="Password" error={errors.password}>
+          <input
+            className="input"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+          />
+        </FormField>
+        <div className="row" style={{ justifyContent: 'flex-end', marginBottom: 16, marginTop: -4 }}>
+          <Link
+            href="/forgot-password"
+            style={{ fontSize: 12.5, color: 'var(--accent)' }}
+          >
+            Forgot password?
+          </Link>
+        </div>
+
+        {errors.submit && (
+          <div
+            className="card"
+            style={{
+              background: 'oklch(from var(--negative) l c h / 0.08)',
+              borderColor: 'oklch(from var(--negative) l c h / 0.3)',
+              padding: 12,
+              fontSize: 13,
+              color: 'var(--negative)',
+              marginBottom: 12,
+            }}
+          >
+            {errors.submit}
             {unverified && (
-              <div className="pl-6.5">
+              <div style={{ marginTop: 8 }}>
                 <button
                   type="button"
+                  className="btn btn-ghost btn-sm"
                   onClick={handleResend}
-                  disabled={resendLoading}
-                  className="text-sm text-[#00d47e] hover:underline disabled:opacity-50"
+                  disabled={resendLoading || !email}
+                  style={{ padding: '4px 0', color: 'var(--accent)' }}
                 >
                   {resendLoading ? 'Sending…' : 'Resend verification email'}
                 </button>
-                {resendMsg && <p className="mt-1 text-xs text-zinc-400">{resendMsg}</p>}
               </div>
             )}
           </div>
         )}
-        <Button type="submit" loading={loading} className="mt-2 w-full">
-          Sign in
-        </Button>
+
+        <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={loading}>
+          {loading && <Icons.Refresh size={15} className="animate-spin" />}
+          {loading ? 'Signing in…' : 'Sign in'}
+        </button>
+        <p style={{ fontSize: 11, color: 'var(--fg-subtle)', textAlign: 'center', marginTop: 14 }}>
+          Rate limit: 10 attempts per 15 min
+        </p>
       </form>
-      <div className="mt-4 flex justify-between text-sm">
-        <Link href="/forgot-password" className="text-zinc-500 hover:text-zinc-300 transition-colors">
-          Forgot password?
-        </Link>
-        <Link href="/register" className="text-[#00d47e] hover:underline">
-          Create account
-        </Link>
-      </div>
-    </AuthCard>
+    </AuthShell>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <>
+      <TopNav />
+      <Suspense fallback={null}>
+        <LoginInner />
+      </Suspense>
+    </>
   )
 }

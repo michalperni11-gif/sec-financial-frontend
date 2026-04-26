@@ -1,378 +1,639 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Navbar } from '@/components/landing/Navbar'
-import { Footer } from '@/components/landing/Footer'
+import { TopNav } from '@/components/layout/TopNav'
+import { Icons } from '@/components/ui/Icons'
+import { useToast } from '@/components/ui/Toast'
 
-const BASE_URL = 'https://sec-financial-api-production.up.railway.app'
-
-const ENDPOINTS = [
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/income-statement',
-    desc: 'Standardized income statement — Revenue, GrossProfit, EBITDA, NetIncome, EPS, and more.',
-    params: [
-      { name: 'period', type: 'string', default: 'annual', desc: 'annual | quarterly | ttm | all' },
-    ],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/balance-sheet',
-    desc: 'Assets, liabilities, and equity for each reporting period.',
-    params: [
-      { name: 'period', type: 'string', default: 'annual', desc: 'annual | quarterly | ttm | all' },
-    ],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/cash-flow',
-    desc: 'Operating, investing, and financing cash flows. FreeCashFlow derived automatically.',
-    params: [
-      { name: 'period', type: 'string', default: 'annual', desc: 'annual | quarterly | ttm | all' },
-    ],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/financials',
-    desc: 'All three statements in a single response — income, balance sheet, cash flow.',
-    params: [
-      { name: 'period', type: 'string', default: 'annual', desc: 'annual | quarterly | ttm | all' },
-    ],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/metrics',
-    desc: 'Pre-computed ratios: margins, ROIC, owner earnings, FCF metrics, leverage, efficiency, and industry-specific metrics (NIM for banks, FFO for REITs, combined ratio for insurers).',
-    params: [],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/scores',
-    desc: 'Piotroski F-Score (0–9 signals across profitability, leverage, efficiency) and Altman Z\'-Score for financial health and distress risk.',
-    params: [],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/income-statement/growth',
-    desc: 'Year-over-year growth rates (%) for every income statement concept.',
-    params: [],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/balance-sheet/growth',
-    desc: 'Year-over-year growth rates (%) for every balance sheet concept.',
-    params: [],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/cash-flow/growth',
-    desc: 'Year-over-year growth rates (%) for every cash flow concept.',
-    params: [],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/filings',
-    desc: 'List of SEC filings (10-K, 10-Q) with accession numbers, filing dates, and report periods.',
-    params: [
-      { name: 'limit', type: 'integer', default: '20', desc: 'Max filings to return' },
-    ],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/peers',
-    desc: 'Companies in the same SIC industry group.',
-    params: [],
-  },
-  {
-    method: 'GET',
-    path: '/v1/screen',
-    desc: 'Screen companies by financial metrics. Supports 15+ filters: gross_margin_min/max, net_margin_min, roic_min, revenue_min, fcf_min, debt_to_ebitda_max, current_ratio_min, and more.',
-    params: [
-      { name: 'index', type: 'string', default: '', desc: 'sp500 | russell1000 | russell3000' },
-      { name: 'gross_margin_min', type: 'number', default: '', desc: 'Min gross margin %' },
-      { name: 'roic_min', type: 'number', default: '', desc: 'Min ROIC %' },
-      { name: 'revenue_min', type: 'number', default: '', desc: 'Min annual revenue (absolute $)' },
-      { name: 'limit', type: 'integer', default: '50', desc: '1–500' },
-    ],
-  },
-  {
-    method: 'GET',
-    path: '/v1/companies/metrics',
-    desc: 'Bulk pre-computed metrics for all companies in an index — single call, no per-request joins.',
-    params: [
-      { name: 'index', type: 'string', default: 'sp500', desc: 'sp500 | russell1000 | russell3000' },
-      { name: 'limit', type: 'integer', default: '500', desc: 'Max companies to return' },
-    ],
-  },
-  {
-    method: 'GET',
-    path: '/v1/company/{ticker}/info',
-    desc: 'Company metadata: CIK, name, SIC code, industry, exchange, city, state of incorporation, fiscal year end, index membership, and last ingested date.',
-    params: [],
-  },
-  {
-    method: 'GET',
-    path: '/v1/companies',
-    desc: 'Paginated list of all indexed companies with search and filter support.',
-    params: [
-      { name: 'search', type: 'string', default: '', desc: 'Substring match on ticker or company name' },
-      { name: 'index', type: 'string', default: '', desc: 'sp500 | russell1000 | russell3000' },
-      { name: 'sic', type: 'string', default: '', desc: 'Filter by SIC code (e.g. 6020)' },
-      { name: 'limit', type: 'integer', default: '100', desc: '1–1000' },
-      { name: 'offset', type: 'integer', default: '0', desc: 'Pagination offset' },
-    ],
-  },
+const DOCS_NAV = [
+  { id: 'quickstart', label: 'Quick start', group: 'Getting started' },
+  { id: 'auth', label: 'Authentication', group: 'Getting started' },
+  { id: 'ratelimits', label: 'Rate limits', group: 'Getting started' },
+  { id: 'ep-info', label: '/v1/company/{ticker}/info', group: 'Endpoints', mono: true },
+  { id: 'ep-financials', label: '/v1/company/{ticker}/financials', group: 'Endpoints', mono: true },
+  { id: 'ep-income', label: '/v1/company/{ticker}/income-statement', group: 'Endpoints', mono: true },
+  { id: 'ep-balance', label: '/v1/company/{ticker}/balance-sheet', group: 'Endpoints', mono: true },
+  { id: 'ep-cash', label: '/v1/company/{ticker}/cash-flow', group: 'Endpoints', mono: true },
+  { id: 'ep-metrics', label: '/v1/company/{ticker}/metrics', group: 'Endpoints', mono: true },
+  { id: 'ep-list', label: '/v1/companies', group: 'Endpoints', mono: true },
+  { id: 'errors', label: 'Error codes', group: 'Reference' },
+  { id: 'tiers', label: 'Tier comparison', group: 'Reference' },
+  { id: 'changelog', label: 'Changelog', group: 'Reference' },
 ]
 
-const RESPONSE_EXAMPLE = `{
-  "ticker": "AAPL",
-  "cik": "0000320193",
-  "statement": "income_statement",
-  "periods": ["2022-09-24", "2023-09-30", "2024-09-28"],
-  "data": {
-    "Revenue":         { "2022-09-24": 394328000000, "2023-09-30": 383285000000, "2024-09-28": 391035000000 },
-    "GrossProfit":     { "2022-09-24": 170782000000, "2023-09-30": 169148000000, "2024-09-28": 180683000000 },
-    "OperatingIncome": { "2022-09-24": 119437000000, "2023-09-30": 114301000000, "2024-09-28": 123216000000 },
-    "EBITDA":          { "2022-09-24": 130090000000, "2023-09-30": 125820000000, "2024-09-28": 134661000000 },
-    "NetIncome":       { "2022-09-24":  99803000000, "2023-09-30":  96995000000, "2024-09-28":  93736000000 },
-    "EPSDiluted":      { "2022-09-24":         6.07, "2023-09-30":         6.13, "2024-09-28":         6.08 }
-  },
-  "period_metadata": {
-    "2024-09-28": { "currency": "USD", "filing_date": "2024-11-01", "form": "10-K", "fiscal_year": "2024" }
-  }
-}`
+const CODE_PY = `import requests
 
-const METRICS_EXAMPLE = `{
-  "ticker": "AAPL",
-  "latest_fiscal_year": "2024-09-28",
-  "gross_margin_pct": 46.2,
-  "operating_margin_pct": 31.5,
-  "net_margin_pct": 23.9,
-  "roic": 48.1,
-  "debt_to_ebitda": 0.75,
-  "net_debt_to_ebitda": 0.53,
-  "interest_coverage": 29.4,
-  "current_ratio": 0.87,
-  "fcf_to_ebitda": 0.81,
-  "asset_turnover": 1.07,
-  "inventory_turnover": 41.2
-}`
+r = requests.get(
+    "https://sec-financial-api-production.up.railway.app/v1/company/MSFT/income-statement",
+    headers={"X-API-Key": "sk_live_…"},
+    params={"period": "annual", "limit": 5},
+)
+print(r.json())`
+
+const CODE_JS = `const r = await fetch(
+  "https://sec-financial-api-production.up.railway.app/v1/company/MSFT/income-statement?period=annual&limit=5",
+  { headers: { "X-API-Key": "sk_live_…" } }
+);
+console.log(await r.json());`
+
+const CODE_CURL = `curl https://sec-financial-api-production.up.railway.app/v1/company/MSFT/income-statement \\
+  -H "X-API-Key: sk_live_…" \\
+  -G --data-urlencode "period=annual" --data-urlencode "limit=5"`
+
+function CodeTabs() {
+  const toast = useToast()
+  const [tab, setTab] = useState<'python' | 'js' | 'curl'>('python')
+  const code = tab === 'python' ? CODE_PY : tab === 'js' ? CODE_JS : CODE_CURL
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code)
+      toast({ kind: 'success', message: 'Copied' })
+    } catch {
+      toast({ kind: 'error', message: 'Could not copy' })
+    }
+  }
+
+  return (
+    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div
+        className="row"
+        style={{
+          borderBottom: '1px solid var(--border)',
+          padding: '0 14px',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div className="row">
+          {(['python', 'js', 'curl'] as const).map(k => {
+            const labels = { python: 'Python', js: 'JavaScript', curl: 'cURL' }
+            return (
+              <button
+                key={k}
+                onClick={() => setTab(k)}
+                style={{
+                  padding: '12px 14px',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  border: 'none',
+                  background: 'transparent',
+                  color: tab === k ? 'var(--fg)' : 'var(--fg-muted)',
+                  borderBottom: tab === k ? '2px solid var(--accent)' : '2px solid transparent',
+                }}
+              >
+                {labels[k]}
+              </button>
+            )
+          })}
+        </div>
+        <button className="btn btn-ghost btn-sm" onClick={copy}>
+          <Icons.Copy size={13} /> Copy
+        </button>
+      </div>
+      <pre
+        className="mono"
+        style={{
+          margin: 0,
+          padding: 16,
+          fontSize: 12.5,
+          lineHeight: 1.65,
+          color: 'var(--fg)',
+          overflow: 'auto',
+        }}
+      >
+        {code}
+      </pre>
+    </div>
+  )
+}
+
+function DocPage({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
+  return (
+    <div className="col" style={{ gap: 16 }}>
+      <div className="eyebrow">{eyebrow}</div>
+      <h2 style={{ fontSize: 32 }}>{title}</h2>
+      {children}
+    </div>
+  )
+}
+
+function DocQuickstart() {
+  return (
+    <DocPage eyebrow="Getting started" title="Quick start">
+      <p style={{ color: 'var(--fg-muted)', fontSize: 15, lineHeight: 1.6 }}>
+        Get from zero to your first request in under a minute. The API serves standardized SEC EDGAR data — no XBRL
+        parsing required on your side.
+      </p>
+      <div className="card">
+        <h4 style={{ marginBottom: 12 }}>1. Create an account</h4>
+        <p style={{ color: 'var(--fg-muted)', fontSize: 14, marginBottom: 14 }}>
+          Free tier — 100 requests/day, no credit card.{' '}
+          <Link href="/register" style={{ color: 'var(--accent)' }}>
+            Sign up →
+          </Link>
+        </p>
+      </div>
+      <h4 style={{ marginTop: 16 }}>2. Make your first request</h4>
+      <CodeTabs />
+      <h4 style={{ marginTop: 16 }}>3. Inspect the response</h4>
+      <p style={{ color: 'var(--fg-muted)', fontSize: 14 }}>
+        You&apos;ll get a JSON object with normalized GAAP fields. Every numeric field is in USD millions unless
+        otherwise noted.
+      </p>
+    </DocPage>
+  )
+}
+
+function DocAuth() {
+  return (
+    <DocPage eyebrow="Getting started" title="Authentication">
+      <p style={{ color: 'var(--fg-muted)', fontSize: 15, lineHeight: 1.6 }}>
+        Two auth modes: <span className="mono">X-API-Key</span> header for server-to-server, JWT bearer for
+        user-scoped requests from your dashboard UI.
+      </p>
+      <div className="card">
+        <h4 style={{ marginBottom: 12 }}>API key (recommended)</h4>
+        <CodeTabs />
+      </div>
+      <div className="card">
+        <h4 style={{ marginBottom: 12 }}>JWT Bearer</h4>
+        <p style={{ color: 'var(--fg-muted)', fontSize: 13.5 }}>
+          POST <span className="mono">/auth/login</span> returns a JWT. Pass it in the{' '}
+          <span className="mono">Authorization: Bearer …</span> header. JWTs expire after 24h.
+        </p>
+      </div>
+    </DocPage>
+  )
+}
+
+function DocRateLimits() {
+  return (
+    <DocPage eyebrow="Getting started" title="Rate limits">
+      <p style={{ color: 'var(--fg-muted)', fontSize: 15, lineHeight: 1.6 }}>
+        Limits are per-API-key. Exceeding returns <span className="mono">429 Too Many Requests</span> with a{' '}
+        <span className="mono">Retry-After</span> header in seconds.
+      </p>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <table className="tbl">
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th className="num">Per minute</th>
+              <th className="num">Per day</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Free</td>
+              <td className="num tbl-mono">—</td>
+              <td className="num tbl-mono">100</td>
+            </tr>
+            <tr>
+              <td>Basic</td>
+              <td className="num tbl-mono">500</td>
+              <td className="num tbl-mono">unlimited</td>
+            </tr>
+            <tr>
+              <td>Starter</td>
+              <td className="num tbl-mono">500</td>
+              <td className="num tbl-mono">unlimited</td>
+            </tr>
+            <tr>
+              <td>Growth</td>
+              <td className="num tbl-mono">1,000</td>
+              <td className="num tbl-mono">unlimited</td>
+            </tr>
+            <tr>
+              <td>Pro</td>
+              <td className="num tbl-mono">3,000</td>
+              <td className="num tbl-mono">unlimited</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </DocPage>
+  )
+}
+
+function DocEndpoint({ id }: { id: string }) {
+  const path = DOCS_NAV.find(d => d.id === id)?.label || ''
+  return (
+    <DocPage eyebrow="Endpoints" title={path}>
+      <div className="row" style={{ gap: 8, marginTop: -8 }}>
+        <span
+          className="badge mono"
+          style={{
+            color: 'var(--accent)',
+            borderColor: 'oklch(from var(--accent) l c h / 0.3)',
+            background: 'var(--accent-soft)',
+            fontWeight: 600,
+          }}
+        >
+          GET
+        </span>
+        <span className="badge">Free tier</span>
+      </div>
+      <p style={{ color: 'var(--fg-muted)', fontSize: 15, lineHeight: 1.6 }}>
+        Returns the requested statement for the given ticker. Data is normalized across filers and indexed by
+        fiscal period.
+      </p>
+      <h4>Parameters</h4>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <table className="tbl">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>In</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="tbl-mono">ticker</td>
+              <td>path</td>
+              <td className="tbl-mono">string</td>
+              <td>Ticker symbol (e.g. MSFT)</td>
+            </tr>
+            <tr>
+              <td className="tbl-mono">period</td>
+              <td>query</td>
+              <td className="tbl-mono">enum</td>
+              <td>
+                <span className="mono">annual</span> or <span className="mono">quarterly</span> · default annual
+              </td>
+            </tr>
+            <tr>
+              <td className="tbl-mono">limit</td>
+              <td>query</td>
+              <td className="tbl-mono">int</td>
+              <td>Number of periods to return · default 5</td>
+            </tr>
+            <tr>
+              <td className="tbl-mono">cutoff_date</td>
+              <td>query</td>
+              <td className="tbl-mono">date</td>
+              <td>ISO date — only return periods on or before this date</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h4>Example request</h4>
+      <CodeTabs />
+      <Link href="/playground" className="btn btn-outline" style={{ alignSelf: 'flex-start', marginTop: 8 }}>
+        <Icons.Terminal size={14} /> Try in playground
+      </Link>
+    </DocPage>
+  )
+}
+
+function DocErrors() {
+  return (
+    <DocPage eyebrow="Reference" title="Error codes">
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <table className="tbl">
+          <thead>
+            <tr>
+              <th className="tbl-mono">Code</th>
+              <th>Meaning</th>
+              <th>What to do</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="tbl-mono">400</td>
+              <td>Bad request</td>
+              <td>Check params — see error message body.</td>
+            </tr>
+            <tr>
+              <td className="tbl-mono">401</td>
+              <td>Missing or invalid auth</td>
+              <td>Verify X-API-Key or refresh JWT.</td>
+            </tr>
+            <tr>
+              <td className="tbl-mono">403</td>
+              <td>Tier doesn&apos;t include this</td>
+              <td>Upgrade plan or use a covered ticker.</td>
+            </tr>
+            <tr>
+              <td className="tbl-mono">404</td>
+              <td>Ticker not found</td>
+              <td>Try /v1/companies?search=…</td>
+            </tr>
+            <tr>
+              <td className="tbl-mono">429</td>
+              <td>Rate limit hit</td>
+              <td>Backoff using Retry-After header.</td>
+            </tr>
+            <tr>
+              <td className="tbl-mono">5xx</td>
+              <td>Our problem</td>
+              <td>Retry with exponential backoff.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </DocPage>
+  )
+}
+
+function DocTiers() {
+  const tiers = [
+    { name: 'Free', price: 0, reqDay: '100', reqMin: '—', coverage: 'S&P 500', history: '5 years', featured: false },
+    { name: 'Basic', price: 19, reqDay: '—', reqMin: '500', coverage: 'S&P 500', history: '10 years', featured: false },
+    { name: 'Starter', price: 49, reqDay: '—', reqMin: '500', coverage: 'All US', history: '10 years', featured: true },
+    { name: 'Growth', price: 149, reqDay: '—', reqMin: '1,000', coverage: 'All US', history: 'Full', featured: false },
+    { name: 'Pro', price: 499, reqDay: '—', reqMin: '3,000', coverage: 'All US', history: 'Full', featured: false },
+  ]
+  return (
+    <DocPage eyebrow="Reference" title="Tier comparison">
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <table className="tbl">
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Price</th>
+              <th className="num">Req/Day</th>
+              <th className="num">Req/Min</th>
+              <th>Coverage</th>
+              <th>History</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tiers.map(t => (
+              <tr key={t.name}>
+                <td>
+                  <strong>{t.name}</strong>
+                  {t.featured && (
+                    <span className="badge badge-accent" style={{ marginLeft: 8, fontSize: 10 }}>
+                      POPULAR
+                    </span>
+                  )}
+                </td>
+                <td className="tbl-mono">
+                  ${t.price}
+                  {t.price > 0 ? '/mo' : ''}
+                </td>
+                <td className="num tbl-mono">{t.reqDay}</td>
+                <td className="num tbl-mono">{t.reqMin}</td>
+                <td>{t.coverage}</td>
+                <td>{t.history}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </DocPage>
+  )
+}
+
+function DocChangelog() {
+  const items = [
+    { date: '2026-04-26', tag: 'feature', title: 'Backup system rewritten', body: 'sqlite3.backup() now used for atomic, WAL-inclusive snapshots. No more lost data on container restart.' },
+    { date: '2026-04-22', tag: 'feature', title: 'DQS scoring v2', body: 'Now flags restatements and concept-coverage gaps separately.' },
+    { date: '2026-04-08', tag: 'feature', title: 'Quarterly data backfilled', body: 'All S&P 500 quarterly statements back to 2014.' },
+  ]
+  return (
+    <DocPage eyebrow="Reference" title="Changelog">
+      <div className="col" style={{ gap: 16 }}>
+        {items.map((it, i) => (
+          <div key={i} className="card">
+            <div className="row" style={{ gap: 12, marginBottom: 8 }}>
+              <span className="mono" style={{ fontSize: 12, color: 'var(--fg-subtle)' }}>
+                {it.date}
+              </span>
+              <span
+                className="badge"
+                style={{ textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.06em' }}
+              >
+                {it.tag}
+              </span>
+            </div>
+            <h4 style={{ marginBottom: 4 }}>{it.title}</h4>
+            <p style={{ color: 'var(--fg-muted)', fontSize: 13.5 }}>{it.body}</p>
+          </div>
+        ))}
+      </div>
+    </DocPage>
+  )
+}
 
 export default function DocsPage() {
+  const [active, setActive] = useState('quickstart')
+  const [search, setSearch] = useState('')
+  const [cmdK, setCmdK] = useState(false)
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setCmdK(true)
+      } else if (e.key === 'Escape') {
+        setCmdK(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  const groups: Record<string, typeof DOCS_NAV> = {}
+  DOCS_NAV.forEach(item => {
+    if (!groups[item.group]) groups[item.group] = []
+    groups[item.group].push(item)
+  })
+
+  const filtered = DOCS_NAV.filter(i => i.label.toLowerCase().includes(search.toLowerCase()))
+
   return (
     <>
-      <Navbar />
-      <main className="mx-auto max-w-3xl px-6 pb-24 pt-28">
-        <h1 className="mb-2 text-3xl font-black text-zinc-100">Documentation</h1>
-        <p className="mb-12 text-zinc-500">Get started with SECfinAPI in minutes.</p>
-
-        {/* Quick start */}
-        <section className="mb-12">
-          <h2 className="mb-4 text-lg font-bold text-zinc-100">Quick start</h2>
-          <ol className="flex flex-col gap-4 text-sm text-zinc-400">
-            <li>
-              <span className="font-semibold text-zinc-200">1. Create a free account</span>
-              <br />
-              <Link href="/register" className="text-[#00d47e] hover:underline">Register here</Link>
-              {' '}— no credit card required.
-            </li>
-            <li>
-              <span className="font-semibold text-zinc-200">2. Verify your email</span>
-              <br />
-              Click the link we send you. Your API key appears in your dashboard immediately.
-            </li>
-            <li>
-              <span className="font-semibold text-zinc-200">3. Make your first request</span>
-              <pre className="mt-2 overflow-x-auto rounded border border-zinc-800 bg-[#0d0d0d] p-4 text-xs text-[#00d47e]">{`curl "${BASE_URL}/v1/company/AAPL/income-statement" \\
-  -H "X-API-Key: YOUR_API_KEY"`}</pre>
-            </li>
-          </ol>
-        </section>
-
-        {/* Authentication */}
-        <section className="mb-12">
-          <h2 className="mb-4 text-lg font-bold text-zinc-100">Authentication</h2>
-          <p className="mb-3 text-sm text-zinc-400">
-            Pass your API key in the <code className="rounded bg-zinc-800 px-1 text-[#00d47e]">X-API-Key</code> header on every request.
-            You can also pass it as a query parameter: <code className="rounded bg-zinc-800 px-1 text-[#00d47e]">?apikey=YOUR_KEY</code>.
-          </p>
-          <pre className="overflow-x-auto rounded border border-zinc-800 bg-[#0d0d0d] p-4 text-xs text-[#00d47e]">{`X-API-Key: sk_live_your_key_here`}</pre>
-        </section>
-
-        {/* Response format */}
-        <section className="mb-12">
-          <h2 className="mb-4 text-lg font-bold text-zinc-100">Response format</h2>
-          <p className="mb-3 text-sm text-zinc-400">
-            Financial statements use a <strong className="text-zinc-200">period-keyed pivot</strong>: each concept maps to an object of{' '}
-            <code className="rounded bg-zinc-800 px-1 text-zinc-300">period_end → value</code> pairs.
-            All monetary values are in the company&apos;s reporting currency (usually USD), in absolute dollars.
-          </p>
-          <pre className="overflow-x-auto rounded border border-zinc-800 bg-[#0d0d0d] p-4 text-xs text-[#00d47e] leading-relaxed">{RESPONSE_EXAMPLE}</pre>
-          <p className="mt-3 text-xs text-zinc-400">
-            <code>period_metadata</code> provides per-period context: currency, SEC filing date, form type, and fiscal year.
-          </p>
-        </section>
-
-        {/* Endpoints */}
-        <section className="mb-12">
-          <h2 className="mb-4 text-lg font-bold text-zinc-100">Endpoints</h2>
-          <p className="mb-1 text-sm text-zinc-500">
-            Base URL: <code className="text-zinc-300">{BASE_URL}</code>
-          </p>
-          <p className="mb-6 text-xs text-zinc-400">
-            Interactive reference (Swagger UI):{' '}
-            <a href={`${BASE_URL}/docs`} target="_blank" rel="noopener noreferrer" className="text-[#00d47e] hover:underline">
-              {BASE_URL}/docs
-            </a>
-          </p>
-          <div className="flex flex-col gap-4">
-            {ENDPOINTS.map((ep) => (
-              <div key={ep.path} className="rounded border border-zinc-800 bg-[#0d0d0d] overflow-hidden">
-                <div className="flex items-start gap-3 px-4 py-3">
-                  <span className="mt-0.5 flex-shrink-0 rounded bg-[#00d47e]/10 px-2 py-0.5 text-xs font-bold text-[#00d47e]">
-                    {ep.method}
-                  </span>
-                  <div>
-                    <code className="text-xs text-zinc-200">{ep.path}</code>
-                    <p className="mt-1 text-xs text-zinc-500">{ep.desc}</p>
-                  </div>
-                </div>
-                {ep.params.length > 0 && (
-                  <div className="border-t border-zinc-800 px-4 py-2">
-                    <div className="flex flex-col gap-1">
-                      {ep.params.map((p) => (
-                        <div key={p.name} className="flex items-baseline gap-2 text-xs">
-                          <code className="w-20 flex-shrink-0 text-zinc-400">{p.name}</code>
-                          <span className="text-zinc-500">{p.type}</span>
-                          <span className="text-zinc-400 flex-1">{p.desc}</span>
-                          {p.default && <span className="text-zinc-500">default: {p.default}</span>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* TTM */}
-        <section className="mb-12">
-          <h2 className="mb-4 text-lg font-bold text-zinc-100">Trailing Twelve Months (TTM)</h2>
-          <p className="mb-3 text-sm text-zinc-400">
-            Pass <code className="rounded bg-zinc-800 px-1 text-[#00d47e]">?period=ttm</code> to any statement or metrics endpoint
-            to get trailing twelve months data — the sum of the 4 most recent quarterly filings (10-Q).
-            This gives you the most current picture without waiting for the next annual filing.
-          </p>
-          <pre className="overflow-x-auto rounded border border-zinc-800 bg-[#0d0d0d] p-4 text-xs text-[#00d47e]">{`curl "${BASE_URL}/v1/company/AAPL/income-statement?period=ttm" \\
-  -H "X-API-Key: YOUR_API_KEY"
-
-# Returns a single "TTM" period column with summed quarterly values`}</pre>
-        </section>
-
-        {/* Metrics */}
-        <section className="mb-12">
-          <h2 className="mb-4 text-lg font-bold text-zinc-100">Metrics endpoint</h2>
-          <p className="mb-3 text-sm text-zinc-400">
-            The <code className="rounded bg-zinc-800 px-1 text-zinc-300">/metrics</code> endpoint returns pre-computed ratios based on the latest annual filing.
-            Industry-specific fields are populated automatically based on SIC code — non-applicable fields return <code className="rounded bg-zinc-800 px-1 text-zinc-300">null</code>.
-          </p>
-          <pre className="overflow-x-auto rounded border border-zinc-800 bg-[#0d0d0d] p-4 text-xs text-[#00d47e] leading-relaxed">{METRICS_EXAMPLE}</pre>
-          <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-            {[
-              ['General', 'gross/operating/net/ebitda margins, ROE, ROA, ROIC, FCF margin, FCF/EBITDA, debt ratios, current ratio, asset/inventory/receivables/payables turnover, capex intensity, EPS'],
-              ['Banks', 'net_interest_margin, efficiency_ratio, loan_to_deposit_ratio, provision_for_credit_losses, tier1_capital_ratio'],
-              ['Insurance', 'loss_ratio, combined_ratio'],
-              ['REITs', 'funds_from_operations, net_operating_income, noi_margin'],
-            ].map(([label, metrics]) => (
-              <div key={label} className="rounded border border-zinc-800 bg-[#0d0d0d] p-3">
-                <div className="mb-1 text-xs font-bold text-[#00d47e]">{label}</div>
-                <div className="text-zinc-400 leading-relaxed">{metrics}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Company search */}
-        <section className="mb-12">
-          <h2 className="mb-4 text-lg font-bold text-zinc-100">Company search & filters</h2>
-          <p className="mb-3 text-sm text-zinc-400">
-            The <code className="rounded bg-zinc-800 px-1 text-zinc-300">/v1/companies</code> endpoint supports filtering and search:
-          </p>
-          <pre className="overflow-x-auto rounded border border-zinc-800 bg-[#0d0d0d] p-4 text-xs text-[#00d47e]">{`# All S&P 500 banks
-GET /v1/companies?index=sp500&sic=6020
-
-# Search by name
-GET /v1/companies?search=apple
-
-# All Russell 3000 companies, paginated
-GET /v1/companies?index=russell3000&limit=100&offset=200`}</pre>
-        </section>
-
-        {/* Tier limits */}
-        <section className="mb-12">
-          <h2 className="mb-4 text-lg font-bold text-zinc-100">Tier limits</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-800 text-left text-xs text-zinc-500">
-                  <th className="pb-2 pr-4">Tier</th>
-                  <th className="pb-2 pr-4">Coverage</th>
-                  <th className="pb-2 pr-4">History</th>
-                  <th className="pb-2">Rate limit</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-900 text-zinc-400">
-                {[
-                  ['Free',       'S&P 500',         '5 years',  '100 req/day'],
-                  ['Basic',      'S&P 500',         '10 years', '500 req/min'],
-                  ['Starter',    '10,000+ companies','10 years', '500 req/min'],
-                  ['Growth',     '10,000+ companies','Full history','1,000 req/min'],
-                  ['Pro',        '10,000+ companies','Full history','3,000 req/min'],
-                  ['Enterprise', '10,000+ companies','Full history','Unlimited'],
-                ].map(([tier, cov, hist, rate]) => (
-                  <tr key={tier}>
-                    <td className="py-2 pr-4 font-medium text-zinc-200">{tier}</td>
-                    <td className="py-2 pr-4">{cov}</td>
-                    <td className="py-2 pr-4">{hist}</td>
-                    <td className="py-2">{rate}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* Error codes */}
-        <section className="mb-12">
-          <h2 className="mb-4 text-lg font-bold text-zinc-100">Error codes</h2>
-          <div className="flex flex-col gap-2 text-xs">
-            {[
-              ['400', 'Bad request — invalid ticker format or parameter value'],
-              ['401', 'Missing or invalid API key'],
-              ['403', 'Tier does not cover this company (upgrade required)'],
-              ['404', 'Company not found — not yet indexed or ticker not recognised'],
-              ['422', 'Validation error — check query parameters'],
-              ['429', 'Rate limit exceeded'],
-              ['503', 'Database busy during ingestion — retry in a moment'],
-            ].map(([code, msg]) => (
-              <div key={code} className="flex items-baseline gap-3 rounded border border-zinc-800 bg-[#0d0d0d] px-4 py-2">
-                <code className="w-10 flex-shrink-0 font-bold text-[#00d47e]">{code}</code>
-                <span className="text-zinc-500">{msg}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <div className="border border-white/[0.08] bg-[#1a1a1a] p-5 text-center">
-          <p className="mb-3 text-sm text-zinc-400">Ready to get started?</p>
-          <Link
-            href="/register"
-            className="inline-flex bg-[#00d47e] px-5 py-2 text-sm font-bold text-black hover:bg-[#00f090] transition-colors"
+      <TopNav />
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(220px, 260px) 1fr',
+          minHeight: 'calc(100vh - 60px)',
+        }}
+      >
+        <div
+          style={{
+            borderRight: '1px solid var(--border)',
+            padding: '20px 16px',
+            overflowY: 'auto',
+            position: 'sticky',
+            top: 60,
+            maxHeight: 'calc(100vh - 60px)',
+          }}
+        >
+          <button
+            className="row input"
+            style={{
+              gap: 8,
+              textAlign: 'left',
+              color: 'var(--fg-subtle)',
+              fontSize: 13,
+              cursor: 'pointer',
+              marginBottom: 18,
+            }}
+            onClick={() => setCmdK(true)}
           >
-            Create free account →
-          </Link>
+            <Icons.Search size={14} />
+            <span style={{ flex: 1 }}>Search docs</span>
+            <span
+              className="mono"
+              style={{
+                fontSize: 10.5,
+                padding: '2px 6px',
+                border: '1px solid var(--border)',
+                borderRadius: 4,
+              }}
+            >
+              ⌘K
+            </span>
+          </button>
+          {Object.entries(groups).map(([g, items]) => (
+            <div key={g} style={{ marginBottom: 18 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: 'var(--fg-subtle)',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  padding: '0 8px',
+                  marginBottom: 6,
+                  fontWeight: 500,
+                }}
+              >
+                {g}
+              </div>
+              {items.map(i => (
+                <button
+                  key={i.id}
+                  onClick={() => setActive(i.id)}
+                  style={{
+                    padding: '7px 10px',
+                    borderRadius: 7,
+                    cursor: 'pointer',
+                    fontSize: i.mono ? 11.5 : 13,
+                    color: active === i.id ? 'var(--accent)' : 'var(--fg-muted)',
+                    background: active === i.id ? 'var(--accent-soft)' : 'transparent',
+                    fontFamily: i.mono ? 'var(--font-mono)' : 'inherit',
+                    width: '100%',
+                    border: 'none',
+                    textAlign: 'left',
+                  }}
+                >
+                  {i.label}
+                </button>
+              ))}
+            </div>
+          ))}
         </div>
-      </main>
-      <Footer />
+
+        <div style={{ padding: '32px 40px', maxWidth: 880, overflow: 'auto' }}>
+          {active === 'quickstart' && <DocQuickstart />}
+          {active === 'auth' && <DocAuth />}
+          {active === 'ratelimits' && <DocRateLimits />}
+          {active.startsWith('ep-') && <DocEndpoint id={active} />}
+          {active === 'errors' && <DocErrors />}
+          {active === 'tiers' && <DocTiers />}
+          {active === 'changelog' && <DocChangelog />}
+        </div>
+      </div>
+
+      {cmdK && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'oklch(0 0 0 / 0.5)',
+            zIndex: 50,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            paddingTop: '15vh',
+          }}
+          onClick={() => setCmdK(false)}
+        >
+          <div
+            className="card"
+            style={{
+              width: 540,
+              maxWidth: '90vw',
+              maxHeight: '60vh',
+              padding: 0,
+              overflow: 'hidden',
+              boxShadow: 'var(--shadow-lg)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div
+              className="row"
+              style={{ gap: 8, padding: '14px 16px', borderBottom: '1px solid var(--border)' }}
+            >
+              <Icons.Search size={15} />
+              <input
+                className="mono"
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  color: 'inherit',
+                  fontSize: 14,
+                }}
+                placeholder="Search endpoints, guides…"
+                autoFocus
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+              <span
+                className="mono"
+                style={{
+                  fontSize: 10.5,
+                  padding: '2px 6px',
+                  border: '1px solid var(--border)',
+                  borderRadius: 4,
+                  color: 'var(--fg-subtle)',
+                }}
+              >
+                ESC
+              </span>
+            </div>
+            <div style={{ maxHeight: 360, overflowY: 'auto', padding: 6 }}>
+              {filtered.map(i => (
+                <button
+                  key={i.id}
+                  className="row"
+                  style={{
+                    gap: 12,
+                    padding: '10px 12px',
+                    borderRadius: 7,
+                    cursor: 'pointer',
+                    width: '100%',
+                    border: 'none',
+                    background: 'transparent',
+                    color: 'inherit',
+                    textAlign: 'left',
+                  }}
+                  onClick={() => {
+                    setActive(i.id)
+                    setCmdK(false)
+                    setSearch('')
+                  }}
+                >
+                  <Icons.FileText size={14} />
+                  <span style={{ fontFamily: i.mono ? 'var(--font-mono)' : 'inherit', fontSize: 13 }}>
+                    {i.label}
+                  </span>
+                  <span style={{ flex: 1 }} />
+                  <span style={{ fontSize: 11, color: 'var(--fg-subtle)' }}>{i.group}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

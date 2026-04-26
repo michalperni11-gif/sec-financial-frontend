@@ -1,9 +1,10 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { TopNav } from '@/components/layout/TopNav'
 import { getToken } from '@/lib/auth'
-import { Sidebar } from '@/components/dashboard/Sidebar'
-import { Spinner } from '@/components/ui/Spinner'
+import { Icons } from '@/components/ui/Icons'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -12,7 +13,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     const token = getToken()
     if (!token) {
-      router.replace('/login')
+      router.replace('/login?next=/dashboard')
     } else {
       setChecked(true)
     }
@@ -20,16 +21,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!checked) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Spinner />
-      </div>
+      <>
+        <TopNav />
+        <div style={{ minHeight: 'calc(100vh - 60px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icons.Refresh size={24} className="animate-spin" />
+        </div>
+      </>
     )
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="flex-1 overflow-auto p-8">{children}</main>
-    </div>
+    <>
+      <TopNav />
+      {children}
+    </>
   )
 }

@@ -1,112 +1,155 @@
 'use client'
-import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+
 import Link from 'next/link'
-import { AuthCard } from '@/components/auth/AuthCard'
-import { Spinner } from '@/components/ui/Spinner'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { TopNav } from '@/components/layout/TopNav'
+import { AuthShell } from '@/components/ui/AuthShell'
+import { Icons } from '@/components/ui/Icons'
+import { useToast } from '@/components/ui/Toast'
 import { apiFetch, ApiError } from '@/lib/api'
 import { setToken } from '@/lib/auth'
 
 type State = 'loading' | 'success' | 'error' | 'missing'
 
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false)
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch { /* ignore */ }
-  }
-  return (
-    <button
-      onClick={copy}
-      className="mt-2 w-full rounded border border-zinc-700 py-1.5 text-xs text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-colors"
-    >
-      {copied ? '✓ Copied' : 'Copy key'}
-    </button>
-  )
+interface VerifyResponse {
+  message: string
+  api_key: string
+  tier: string
+  access_token: string
 }
 
 function VerifyEmailContent() {
-  const searchParams = useSearchParams()
+  const params = useSearchParams()
   const router = useRouter()
-  const token = searchParams.get('token')
+  const toast = useToast()
+  const token = params.get('token')
   const [state, setState] = useState<State>(token ? 'loading' : 'missing')
   const [apiKey, setApiKey] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
+  const [revealed, setRevealed] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (!token) return
-    // Strip token from URL immediately — prevents it appearing in Vercel logs,
-    // browser history, and referrer headers.
     if (typeof window !== 'undefined') {
       window.history.replaceState({}, '', '/verify-email')
     }
-    apiFetch<{ message: string; api_key: string; tier: string; access_token: string }>(
-      `/auth/verify-email?token=${encodeURIComponent(token)}`
-    )
-      .then((data) => {
+    apiFetch<VerifyResponse>(`/auth/verify-email?token=${encodeURIComponent(token)}`)
+      .then(data => {
         setApiKey(data.api_key)
-        // Auto-login: backend issues a JWT on verify so the user lands
-        // directly in the dashboard without a separate login step.
-        if (data.access_token) {
-          setToken(data.access_token)
-        }
+        if (data.access_token) setToken(data.access_token)
         setState('success')
       })
-      .catch((err) => {
+      .catch(err => {
         setErrorMsg(err instanceof ApiError ? err.message : 'Verification failed.')
         setState('error')
       })
   }, [token])
 
+  async function copyKey() {
+    try {
+      await navigator.clipboard.writeText(apiKey)
+      setCopied(true)
+      toast({ kind: 'success', message: 'API key copied to clipboard' })
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast({ kind: 'error', message: 'Could not copy — select & copy manually.' })
+    }
+  }
+
   if (state === 'loading') {
     return (
-      <AuthCard title="Verifying your email...">
-        <div className="flex justify-center py-6"><Spinner /></div>
-      </AuthCard>
+      <AuthShell title="Verifying…" subtitle="Hang tight, we're checking your token.">
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
+          <Icons.Refresh size={32} className="animate-spin" />
+        </div>
+      </AuthShell>
     )
   }
 
   if (state === 'success') {
+    const masked = revealed ? apiKey : `${apiKey.slice(0, 12)}${'\u2022'.repeat(20)}${apiKey.slice(-4)}`
     return (
-      <AuthCard title="Email verified ✓">
-        <p className="mb-3 text-sm text-zinc-400">Your account is active. Save your free API key — it won&apos;t be shown again after you leave this page.</p>
-        <code className="block border border-white/[0.08] bg-[#111111] px-3 py-2 text-xs text-[#00d47e] break-all">
-          {apiKey}
-        </code>
-        <CopyButton text={apiKey} />
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="mt-4 block w-full bg-[#00d47e] py-2 text-center text-sm font-bold text-black hover:bg-[#00f090] transition-colors"
+      <AuthShell title="Email verified \u2713" subtitle="Your account is active. Save your API key now \u2014 it won't be shown again.">
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: 'var(--accent-soft)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--accent)',
+            }}
+          >
+            <Icons.Check size={28} />
+          </div>
+        </div>
+        <div
+          className="row"
+          style={{
+            gap: 8,
+            padding: '12px 16px',
+            background: 'var(--bg-elev)',
+            border: '1px solid var(--border)',
+            borderRadius: 10,
+            marginBottom: 12,
+          }}
         >
-          Go to dashboard →
+          <span className="mono" style={{ flex: 1, fontSize: 12, wordBreak: 'break-all', letterSpacing: '0.02em' }}>
+            {masked}
+          </span>
+          <button
+            className="btn btn-ghost btn-icon"
+            onClick={() => setRevealed(r => !r)}
+            title={revealed ? 'Hide' : 'Reveal'}
+          >
+            {revealed ? <Icons.EyeOff size={15} /> : <Icons.Eye size={15} />}
+          </button>
+          <button className="btn btn-ghost btn-icon" onClick={copyKey} title="Copy">
+            {copied ? <Icons.Check size={15} /> : <Icons.Copy size={15} />}
+          </button>
+        </div>
+        <button
+          className="btn btn-primary btn-lg"
+          style={{ width: '100%' }}
+          onClick={() => router.push('/dashboard')}
+        >
+          Go to dashboard <Icons.ArrowRight size={15} />
         </button>
-      </AuthCard>
+      </AuthShell>
     )
   }
 
   if (state === 'error') {
     return (
-      <AuthCard title="Verification failed">
-        <p className="mb-4 text-sm text-red-400">{errorMsg}</p>
-        <Link href="/register" className="text-sm text-[#00d47e] hover:underline">Register again</Link>
-      </AuthCard>
+      <AuthShell title="Verification failed" subtitle={errorMsg}>
+        <Link href="/register" className="btn btn-outline" style={{ width: '100%' }}>
+          Register again
+        </Link>
+      </AuthShell>
     )
   }
 
   return (
-    <AuthCard title="Invalid link">
-      <p className="text-sm text-zinc-400">This verification link is missing a token. Please use the link from your email.</p>
-    </AuthCard>
+    <AuthShell title="Invalid link" subtitle="This verification link is missing a token. Please use the link from your email.">
+      <Link href="/register" className="btn btn-outline" style={{ width: '100%' }}>
+        Register
+      </Link>
+    </AuthShell>
   )
 }
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Spinner /></div>}>
-      <VerifyEmailContent />
-    </Suspense>
+    <>
+      <TopNav />
+      <Suspense fallback={null}>
+        <VerifyEmailContent />
+      </Suspense>
+    </>
   )
 }

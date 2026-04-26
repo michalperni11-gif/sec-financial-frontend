@@ -1,26 +1,53 @@
-export default function HomePage() {
+import { TopNav } from '@/components/layout/TopNav'
+import { Hero } from '@/components/landing-v2/Hero'
+import { DemoWidget } from '@/components/landing-v2/DemoWidget'
+import { Features } from '@/components/landing-v2/Features'
+import { Pricing } from '@/components/landing-v2/Pricing'
+import { FAQ_Section } from '@/components/landing-v2/FAQ'
+import { Footer } from '@/components/landing-v2/Footer'
+
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://sec-financial-api-production.up.railway.app'
+
+interface Stats {
+  companies: number
+  facts: number
+}
+
+async function fetchStats(): Promise<Stats> {
+  const adminKey = process.env.SECBASE_ADMIN_KEY
+  if (!adminKey) {
+    return { companies: 10000, facts: 0 }
+  }
+  try {
+    const res = await fetch(`${BASE}/admin/status`, {
+      headers: { 'X-Admin-Key': adminKey },
+      next: { revalidate: 300 },
+    })
+    if (!res.ok) return { companies: 10000, facts: 0 }
+    const data = await res.json()
+    return {
+      companies: data.db?.total_companies ?? 10000,
+      facts: data.db?.total_facts ?? 0,
+    }
+  } catch {
+    return { companies: 10000, facts: 0 }
+  }
+}
+
+export default async function HomePage() {
+  const stats = await fetchStats()
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#111111] px-6">
-      <div className="text-center">
-        <div className="mb-6 flex items-center justify-center gap-2.5">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="#00d47e">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
-          <span className="text-xl font-black tracking-wide text-white">
-            SECfin<span className="text-[#00d47e]">API</span>
-          </span>
-        </div>
-        <h1 className="mb-4 text-5xl font-black text-white">Coming Soon</h1>
-        <p className="mb-8 max-w-sm text-sm leading-relaxed text-zinc-500">
-          Standardized SEC financial data for developers.<br />
-          Raw. Fast. Low cost.
-        </p>
-        <div className="inline-flex items-center gap-2 border border-[#00d47e]/20 bg-[#00d47e]/5 px-4 py-2 text-sm text-[#00d47e]">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#00d47e]" />
-          Launching soon
-        </div>
-        <p className="mt-8 text-xs text-zinc-700">secfinapi.com</p>
-      </div>
-    </div>
+    <>
+      <TopNav />
+      <main>
+        <Hero companyCount={stats.companies} />
+        <DemoWidget />
+        <Features />
+        <Pricing />
+        <FAQ_Section />
+      </main>
+      <Footer />
+    </>
   )
 }
