@@ -4,41 +4,25 @@ import { useEffect, useRef, useState } from 'react'
 import { Icons } from '@/components/ui/Icons'
 import { fmtUSD } from '@/lib/format'
 
-interface IncomeRow {
-  period_end?: string
-  period?: string
+interface PeriodRow {
+  period: string
   revenue?: number
-  revenues?: number
-  Revenue?: number
-  operating_income?: number
   operatingIncome?: number
-  net_income?: number
   netIncome?: number
-  eps_diluted?: number
   eps?: number
-  [key: string]: unknown
 }
 
 interface ApiResponse {
   ticker?: string
-  data?: IncomeRow[]
-  income_statement?: IncomeRow[]
-  rows?: IncomeRow[]
+  periods?: string[]
+  data?: Record<string, Record<string, number>>
   error?: string
 }
 
-const SUGGESTED = ['MSFT', 'AAPL', 'JPM', 'GOOGL', 'NVDA']
-
-function readField<T = unknown>(row: Record<string, unknown>, ...names: string[]): T | undefined {
-  for (const n of names) {
-    const v = row[n]
-    if (v != null) return v as T
-  }
-  return undefined
-}
+const SUGGESTED = ['AAPL', 'A', 'AAL', 'ABBV', 'ABNB']
 
 function num(v: unknown): number | undefined {
-  if (typeof v === 'number') return v
+  if (typeof v === 'number' && Number.isFinite(v)) return v
   if (typeof v === 'string' && v.trim()) {
     const n = Number(v)
     return Number.isFinite(n) ? n : undefined
@@ -46,18 +30,25 @@ function num(v: unknown): number | undefined {
   return undefined
 }
 
-function extractRows(payload: ApiResponse): IncomeRow[] {
-  const candidates = [payload.data, payload.income_statement, payload.rows]
-  for (const c of candidates) {
-    if (Array.isArray(c) && c.length) return c
-  }
-  return []
+function extractRows(payload: ApiResponse): PeriodRow[] {
+  const periods = payload.periods
+  const data = payload.data
+  if (!Array.isArray(periods) || !data || typeof data !== 'object') return []
+  // Most recent first → take last 5, then reverse so newest is on top
+  const recent = periods.slice(-5).reverse()
+  return recent.map(p => ({
+    period: p,
+    revenue: num(data.Revenue?.[p]),
+    operatingIncome: num(data.OperatingIncome?.[p]),
+    netIncome: num(data.NetIncome?.[p]),
+    eps: num(data.EPSDiluted?.[p] ?? data.EPSBasic?.[p]),
+  }))
 }
 
 export function DemoWidget() {
   const [ticker, setTicker] = useState('MSFT')
   const [loading, setLoading] = useState(true)
-  const [rows, setRows] = useState<IncomeRow[]>([])
+  const [rows, setRows] = useState<PeriodRow[]>([])
   const [error, setError] = useState<string | null>(null)
   const [meta, setMeta] = useState<{ status: number; ms: number; bytes: number } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -82,7 +73,7 @@ export function DemoWidget() {
         return
       }
 
-      const extracted = extractRows(body).slice(0, 5)
+      const extracted = extractRows(body)
       if (!extracted.length) {
         setError(`No income statement data for ${target}.`)
         setRows([])
@@ -216,24 +207,17 @@ export function DemoWidget() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r, i) => {
-                  const period = readField<string>(r as Record<string, unknown>, 'period_end', 'period', 'fiscal_year', 'date') ?? '—'
-                  const revenue = num(readField(r as Record<string, unknown>, 'revenue', 'revenues', 'Revenue'))
-                  const opInc = num(readField(r as Record<string, unknown>, 'operating_income', 'operatingIncome', 'OperatingIncome'))
-                  const netInc = num(readField(r as Record<string, unknown>, 'net_income', 'netIncome', 'NetIncome'))
-                  const eps = num(readField(r as Record<string, unknown>, 'eps_diluted', 'eps', 'eps_basic', 'EarningsPerShareDiluted'))
-                  return (
-                    <tr key={i}>
-                      <td className="tbl-mono">
-                        <strong>{String(period).slice(0, 10)}</strong>
-                      </td>
-                      <td className="num tbl-mono">{revenue != null ? fmtUSD(revenue) : '—'}</td>
-                      <td className="num tbl-mono">{opInc != null ? fmtUSD(opInc) : '—'}</td>
-                      <td className="num tbl-mono">{netInc != null ? fmtUSD(netInc) : '—'}</td>
-                      <td className="num tbl-mono">{eps != null ? `$${eps.toFixed(2)}` : '—'}</td>
-                    </tr>
-                  )
-                })}
+                {rows.map(r => (
+                  <tr key={r.period}>
+                    <td className="tbl-mono">
+                      <strong>{r.period.slice(0, 10)}</strong>
+                    </td>
+                    <td className="num tbl-mono">{r.revenue != null ? fmtUSD(r.revenue) : '—'}</td>
+                    <td className="num tbl-mono">{r.operatingIncome != null ? fmtUSD(r.operatingIncome) : '—'}</td>
+                    <td className="num tbl-mono">{r.netIncome != null ? fmtUSD(r.netIncome) : '—'}</td>
+                    <td className="num tbl-mono">{r.eps != null ? `$${r.eps.toFixed(2)}` : '—'}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           ) : (
