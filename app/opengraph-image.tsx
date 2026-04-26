@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'SECfinAPI — Standardized SEC financial data, one API'
+export const alt = 'SECfinAPI — Skip the XBRL. Query SEC data as clean JSON.'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -40,12 +40,12 @@ export default function Image() {
             marginBottom: 28,
           }}
         >
-          Standardized SEC financial data — one API.
+          Skip the XBRL. Query SEC data as clean JSON.
         </div>
 
         <div style={{ fontSize: 26, color: '#94a3b8', lineHeight: 1.4, maxWidth: 1000 }}>
-          Income statements, balance sheets, cash flow + 50 ratios for 10,000+ US public companies. Cleaned,
-          normalized, ready to query.
+          Income statements, balance sheets, cash flow + 50 ratios for every US public company. GAAP normalized
+          across filers.
         </div>
 
         <div
@@ -60,7 +60,7 @@ export default function Image() {
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ width: 8, height: 8, background: '#22c5e6', borderRadius: 999 }} />
-            Live API · 10,000+ companies
+            Live · 10-K, 10-Q, 20-F · normalized GAAP
           </span>
           <span>·</span>
           <span>secfinapi.com</span>

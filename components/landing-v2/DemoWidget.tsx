@@ -112,7 +112,7 @@ export function DemoWidget() {
         >
           <div className="col" style={{ gap: 8 }}>
             <div className="eyebrow">Live demo</div>
-            <h3>Try it without signing up</h3>
+            <h3>Type a ticker. Get the financials.</h3>
           </div>
           <div className="badge mono" style={{ fontSize: 11.5 }}>
             GET /v1/company/{ticker.toLowerCase()}/income-statement

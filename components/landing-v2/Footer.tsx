@@ -29,7 +29,7 @@ export function Footer() {
               </span>
             </Link>
             <p style={{ color: 'var(--fg-subtle)', fontSize: 13, lineHeight: 1.55 }}>
-              SEC EDGAR financial data, normalized and served via REST. Built by ex-quants for builders.
+              SEC EDGAR financial data, normalized for developers. One JSON API for every 10-K and 10-Q.
             </p>
           </div>
           {COLS.map(col => (

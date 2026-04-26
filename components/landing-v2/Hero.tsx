@@ -32,38 +32,47 @@ export function Hero({ companyCount }: HeroProps) {
           <div className="badge badge-accent">
             <span className="badge-dot" />
             <span>
-              API v1 · live & ingesting · {companyCount.toLocaleString('en-US')} companies
+              Live · {companyCount.toLocaleString('en-US')} companies indexed · adding hundreds daily
             </span>
           </div>
           <h1>
-            Standardized SEC
+            Skip the XBRL.
             <br />
-            financial data — <span className="gradient-text">one API.</span>
+            Query SEC data as <span className="gradient-text">clean JSON.</span>
           </h1>
-          <p style={{ fontSize: 19, lineHeight: 1.5, color: 'var(--fg-muted)', maxWidth: 640 }}>
-            Income statements, balance sheets, cash flow + 50 ratios for 10,000+ US public companies. Cleaned,
-            normalized, ready to query.
+          <p style={{ fontSize: 19, lineHeight: 1.5, color: 'var(--fg-muted)', maxWidth: 660 }}>
+            Income statements, balance sheets, cash flow, and 50+ ratios for every US public company. GAAP
+            concepts normalized across filers — <span className="mono">Revenue</span> is{' '}
+            <span className="mono">Revenue</span>, whether the filer tagged it{' '}
+            <span className="mono">SalesRevenueNet</span> or <span className="mono">Revenues</span>.
           </p>
           <div className="row" style={{ gap: 12, marginTop: 8 }}>
             <Link href="/register" className="btn btn-primary btn-lg">
               Get free API key <Icons.ArrowRight size={15} />
             </Link>
             <Link href="/docs" className="btn btn-outline btn-lg">
-              View docs
+              Read the docs
             </Link>
           </div>
-          <div className="row" style={{ gap: 24, marginTop: 20, fontSize: 13, color: 'var(--fg-subtle)', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div
+            className="row"
+            style={{
+              gap: 24,
+              marginTop: 20,
+              fontSize: 13,
+              color: 'var(--fg-subtle)',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}
+          >
             <div className="row" style={{ gap: 8 }}>
-              <Icons.Check size={14} />
-              No credit card
+              <Icons.Check size={14} /> 100 requests/day, free forever
             </div>
             <div className="row" style={{ gap: 8 }}>
-              <Icons.Check size={14} />
-              100 free req/day
+              <Icons.Check size={14} /> No credit card
             </div>
             <div className="row" style={{ gap: 8 }}>
-              <Icons.Check size={14} />
-              S&amp;P 500 included
+              <Icons.Check size={14} /> Working in 60 seconds
             </div>
           </div>
         </div>

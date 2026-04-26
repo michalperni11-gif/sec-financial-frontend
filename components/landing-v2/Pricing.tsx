@@ -27,10 +27,10 @@ export function Pricing() {
         style={{ alignItems: 'center', textAlign: 'center', gap: 12, marginBottom: 40 }}
       >
         <div className="eyebrow">Pricing</div>
-        <h2>Start free. Scale when you need to.</h2>
-        <p style={{ color: 'var(--fg-muted)', maxWidth: 540, marginTop: 4 }}>
-          Every tier ships with the same data quality. Higher tiers unlock more requests, broader coverage, and longer
-          history.
+        <h2>Start free. Pay when you ship.</h2>
+        <p style={{ color: 'var(--fg-muted)', maxWidth: 560, marginTop: 4 }}>
+          Same standardized data on every tier. Higher tiers unlock more requests, broader company coverage, and
+          longer history. No seat fees, no overage charges.
         </p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>

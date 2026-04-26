@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: '%s · SECfinAPI',
   },
   description:
-    'REST API for SEC EDGAR financial data. Income statements, balance sheets, cash flow + 50 ratios for 10,000+ US public companies. Standardized GAAP, JSON, no XBRL parsing. Free tier — 100 requests/day.',
+    'Skip the XBRL. Query SEC EDGAR data as clean JSON \u2014 income statements, balance sheets, cash flow, and 50+ ratios for every US public company. GAAP concepts normalized across filers. Free tier, 100 requests/day, no card.',
   metadataBase: new URL('https://secfinapi.com'),
   applicationName: 'SECfinAPI',
   authors: [{ name: 'SECfinAPI' }],
@@ -56,15 +56,15 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://secfinapi.com',
     siteName: 'SECfinAPI',
-    title: 'SECfinAPI — Standardized SEC financial data, one API',
+    title: 'SECfinAPI \u2014 Skip the XBRL. Query SEC data as clean JSON.',
     description:
-      'Income statements, balance sheets, cash flow + 50 ratios for 10,000+ US public companies. Cleaned, normalized, ready to query.',
+      'Income statements, balance sheets, cash flow, and 50+ ratios for every US public company. GAAP normalized across filers.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SECfinAPI — SEC financial data, one API',
+    title: 'SECfinAPI \u2014 Skip the XBRL.',
     description:
-      'Standardized SEC EDGAR financials for 10,000+ US public companies. JSON over REST.',
+      'Query SEC EDGAR data as clean JSON. Standardized concepts across every filer. Free tier, no card.',
   },
   robots: {
     index: true,

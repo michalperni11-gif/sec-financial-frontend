@@ -37,31 +37,31 @@ const SOFTWARE = {
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: 'Where does the data come from?',
-    a: 'Directly from SEC EDGAR XBRL filings. We pull 10-K and 10-Q submissions, normalize the GAAP concepts into a consistent schema, and serve them through one stable API.',
+    a: 'Direct from SEC EDGAR XBRL filings (10-K, 10-Q, 20-F, 40-F). We parse the raw XBRL, map every filer\u2019s GAAP tags to one consistent schema, and expose it as JSON.',
   },
   {
     q: 'How fresh is the data?',
-    a: 'Filings are ingested within hours of being posted to EDGAR. Our scheduler respects the 9 req/sec SEC throttle and runs continuously.',
+    a: 'New filings show up within hours of being posted on EDGAR. Background ingest runs continuously at SEC\u2019s 9 req/sec ceiling, with a full refresh every Sunday at 02:00 UTC.',
   },
   {
     q: 'What is DQS?',
-    a: 'Data Quality Score \u2014 a 0-100 rating per filing that flags missing concepts, restatements, and unusual reporting choices.',
+    a: 'Data Quality Score \u2014 a 0-100 rating per filing with flags for restatements, missing concepts, balance-sheet imbalance, and unusual reporting. Use it to decide programmatically when to trust a number.',
+  },
+  {
+    q: 'How is the data normalized across filers?',
+    a: 'A maintained TAG_MAP collapses synonymous GAAP concepts. Apple\u2019s RevenueFromContractWithCustomerExcludingAssessedTax, Tesla\u2019s Revenues, and other variants all become Revenue.',
   },
   {
     q: 'Can I cancel anytime?',
-    a: "Yes. Subscriptions are month-to-month. Cancel from the billing page and you'll keep access through the end of the current period.",
-  },
-  {
-    q: 'Do you offer annual pricing?',
-    a: "Annual plans get two months free. Email us once you're on a paid tier and we'll switch you over.",
+    a: 'Yes. Subscriptions are month-to-month via Stripe. Cancel from the billing page and keep access through the end of the current period.',
   },
   {
     q: 'What happens if I exceed my rate limit?',
-    a: 'You get a 429 response with a Retry-After header. We never silently drop requests or charge overage fees.',
+    a: 'You get a 429 response with a Retry-After header. No silent drops, no overage charges.',
   },
   {
-    q: 'Can I use this for commercial products?',
-    a: 'Yes, all paid tiers include a commercial license. The Free tier is non-commercial only.',
+    q: 'Can I use this commercially?',
+    a: 'Yes on paid tiers. Free tier is non-commercial \u2014 personal projects, research, evaluation only.',
   },
 ]
 
