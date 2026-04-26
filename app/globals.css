@@ -114,23 +114,7 @@ a { color: inherit; text-decoration: none; }
   cursor: pointer;
   color: var(--fg);
 }
-.brand-mark {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  background: linear-gradient(135deg, var(--accent), oklch(from var(--accent) calc(l - 0.15) c calc(h + 30)));
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.brand-mark::after {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border-radius: 3px;
-  background:
-    linear-gradient(to top, var(--bg) 0 18%, transparent 18% 32%, var(--bg) 32% 38%, transparent 38% 60%, var(--bg) 60% 66%, transparent 66%);
-}
+/* .brand-mark replaced by <BrandMark /> SVG component (components/ui/BrandMark.tsx) */
 .nav-links {
   display: flex;
   gap: 4px;

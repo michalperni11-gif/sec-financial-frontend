@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useTheme } from '@/components/ui/ThemeProvider'
 import { Icons } from '@/components/ui/Icons'
+import { BrandMark } from '@/components/ui/BrandMark'
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -31,7 +32,7 @@ export function TopNav() {
       <nav className="nav">
         <div className="nav-inner">
           <Link href="/" className="brand">
-            <span className="brand-mark" />
+            <BrandMark size={22} />
             <span>
               SECfin<span style={{ color: 'var(--accent)' }}>API</span>
             </span>
@@ -118,7 +119,7 @@ export function TopNav() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <Link href="/" className="brand" onClick={() => setMobileOpen(false)}>
-                <span className="brand-mark" />
+                <BrandMark size={22} />
                 <span>
                   SECfin<span style={{ color: 'var(--accent)' }}>API</span>
                 </span>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BrandMark } from '@/components/ui/BrandMark'
 
 const COLS = [
   { title: 'Product', items: [['Pricing', '/#pricing'], ['Docs', '/docs'], ['Playground', '/playground']] },
@@ -22,7 +23,7 @@ export function Footer() {
         >
           <div className="col" style={{ gap: 12 }}>
             <Link href="/" className="row brand" style={{ gap: 8 }}>
-              <span className="brand-mark" />
+              <BrandMark size={22} />
               <span>
                 SECfin<span style={{ color: 'var(--accent)' }}>API</span>
               </span>
